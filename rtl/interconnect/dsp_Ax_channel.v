@@ -58,7 +58,7 @@ module dsp_Ax_channel
     // Local parameters initialization
     localparam ADDR_INFO_W  = SLV_ID_W + TRANS_DATA_LEN_W;
     localparam Ax_INFO_W    = TRANS_MST_ID_W + ADDR_WIDTH + TRANS_BURST_W + TRANS_DATA_LEN_W + TRANS_DATA_SIZE_W;
-    
+    localparam SLV_ID_MAP_W = SLV_ID_MSB_IDX - SLV_ID_LSB_IDX + 1;
     // Internal variable declaration
     genvar slv_idx;
     
@@ -76,7 +76,7 @@ module dsp_Ax_channel
     // -- Misc
     wire    [SLV_ID_W-1:0]          slv_id;
     wire    [SLV_AMT-1:0]           slv_sel;
-    wire    [SLV_ID_W-1:0]          addr_slv_mapping;
+    wire    [SLV_ID_MAP_W-1:0]      addr_slv_mapping;
     wire    [TRANS_DATA_LEN_W-1:0]  AxLEN_valid;
     // -- Transfer counter
     wire    [TRANS_DATA_LEN_W-1:0]  transfer_ctn_nxt;

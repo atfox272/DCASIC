@@ -18,7 +18,7 @@ module axi_interconnect
     parameter                       TRANS_WR_RESP_W     = 2,
     // Slave info configuration (address mapping mechanism) (Default: The upper bits)
     parameter                       SLV_ID_MSB_IDX      = ADDR_WIDTH - 1,
-    parameter                       SLV_ID_LSB_IDX      = ADDR_WIDTH - SLV_ID_W - 1,
+    parameter                       SLV_ID_LSB_IDX      = ADDR_WIDTH - $clog2(SLV_AMT),
     // Dispatcher DATA depth configuration
     parameter                       DSP_RDATA_DEPTH     = 16
 )

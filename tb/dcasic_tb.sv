@@ -327,6 +327,7 @@ module dcasic_tb;
                         $display("SLAVE DEVICE ADDRESS: %2h", tx_data[0]);
                         $display("READ DATA:            %2h", tx_data[1]);
                     end
+                    $display("----------------------------------------");
                     // Reset the state and buffer in slv
                     start_tx_flg = 1;
                     sccb_slv_st      <= SCCB_IDLE_ST;
