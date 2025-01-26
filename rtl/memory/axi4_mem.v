@@ -12,7 +12,8 @@ module axi4_mem
     parameter MEM_OFFSET        = (DATA_W/8),       // Address mapping - OFFSET ---> Address (byte-access) = (base + offset*n)
     parameter MEM_DATA_W        = DATA_W,           // Memory's data width
     parameter MEM_ADDR_W        = 10,               // Memory's address width
-    parameter MEM_LATENCY       = 1                 // Memory latency
+    parameter MEM_LATENCY       = 1,                // Memory latency
+    parameter MEM_INIT_FILE     = ""                // Initial value in Memory
 ) (
     // Input declaration
     // -- Global 
@@ -129,7 +130,8 @@ module axi4_mem
 
     memory #(
         .DATA_W             (MEM_DATA_W),
-        .ADDR_W             (MEM_ADDR_W)
+        .ADDR_W             (MEM_ADDR_W),
+        .MEM_FILE           (MEM_INIT_FILE)
     ) mem (
         .clk                (clk),
         .rst_n              (rst_n),

@@ -8,7 +8,8 @@ module dcasic
     // DBI Interface
     parameter DBI_IF_D_W        = 8,
     // Instruction Memory
-    parameter IMEM_W            = 8    // 256 instructions
+    parameter IMEM_W            = 8,    // 256 instructions
+    parameter BOOTLOADER_FILE   = ""    // Bootloader file of the system
 ) (
     input                       sys_clk,
     output                      sys_trap_o,
@@ -250,7 +251,20 @@ module dcasic
         .mem_axi_arprot         (),
         .mem_axi_rvalid         (icm_rvalid[0]),
         .mem_axi_rready         (icm_rready[0]),
-        .mem_axi_rdata          (icm_rdata[0])
+        .mem_axi_rdata          (icm_rdata[0]),
+        // N/C
+        .pcpi_valid             (),
+        .pcpi_insn              (),
+        .pcpi_rs1               (),
+        .pcpi_rs2               (),
+        .pcpi_wr                (),
+        .pcpi_rd                (),
+        .pcpi_wait              (),
+        .pcpi_ready             (),
+        .irq                    (),
+        .eoi                    (),
+        .trace_valid            (),
+        .trace_data             ()
     );
 
     // -- Interconnect
@@ -344,8 +358,9 @@ module dcasic
         .MEM_BASE_ADDR          (IMEM_BASE_ADDR),
         .MEM_OFFSET             (4),
         .MEM_DATA_W             (CONF_DATA_W),
-        .MEM_ADDR_W             (IMEM_W), // 32bit x (2^10)
-        .MEM_LATENCY            (1)
+        .MEM_ADDR_W             (IMEM_W),       // 32bit x (2^10)
+        .MEM_LATENCY            (1),
+        .MEM_INIT_FILE          (BOOTLOADER_FILE)
     ) im (
         .clk                    (sys_clk),
         .rst_n                  (rst_n),
@@ -544,6 +559,8 @@ module dcasic
     // Connection
     genvar mst_idx;
     genvar slv_idx;
+    assign icm_awid[0]  = {CONF_MST_ID_W{1'b0}};
+    assign icm_arid[0]  = {CONF_MST_ID_W{1'b0}};
     assign icm_awlen[0] = {CONF_TX_DAT_LEN_W{1'b0}};
     assign icm_arlen[0] = {CONF_TX_DAT_LEN_W{1'b0}};
     assign icm_wlast[0] = 1'b1;

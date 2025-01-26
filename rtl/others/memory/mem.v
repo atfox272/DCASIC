@@ -1,7 +1,8 @@
 module memory
 #(
-    parameter DATA_W = 8,
-    parameter ADDR_W = 8
+    parameter DATA_W    = 8,
+    parameter ADDR_W    = 8,
+    parameter MEM_FILE  = ""
 )
 (
     input                   clk,
@@ -52,5 +53,10 @@ module memory
         else begin
             rd_rdy_q1 <= rd_vld_i;
         end 
+    end
+    initial begin
+        if(MEM_FILE != "") begin
+            $readmemh(MEM_FILE, mem); // Load memory from file
+        end
     end
 endmodule
