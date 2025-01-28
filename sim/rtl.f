@@ -1,0 +1,14 @@
+./../rtl/*.v
+./../rtl/processor/*.v
+./../rtl/interconnect/*.v
+./../rtl/memory/*.v
+./../rtl/camera_rx_controller/*.v
+./../rtl/display_tx_controller/*.v
+./../rtl/peripherals/sccb_master_controller/*.v
+./../rtl/others/adapter/*.v
+./../rtl/others/arbiter/*.v
+./../rtl/others/decoder/*.v
+./../rtl/others/edgedet/*.v
+./../rtl/others/encoder/*.v
+./../rtl/others/fifo/*.v
+./../rtl/others/memory/*.v

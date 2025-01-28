@@ -76,6 +76,7 @@ module dvp_rx_controller
     // -- -- W channel
     output                          m_wready_o,
     // -- -- B channel
+    output  [MST_ID_W-1:0]          m_bid_o,
     output  [TRANS_RESP_W-1:0]      m_bresp_o,
     output                          m_bvalid_o,
     // -- -- AR channel
@@ -171,6 +172,7 @@ module dvp_rx_controller
         .m_rready_i     (m_rready_i ),
         .m_awready_o    (m_awready_o),
         .m_wready_o     (m_wready_o ),
+        .m_bid_o        (m_bid_o    ),
         .m_bresp_o      (m_bresp_o  ),
         .m_bvalid_o     (m_bvalid_o ),
         .m_arready_o    (m_arready_o),

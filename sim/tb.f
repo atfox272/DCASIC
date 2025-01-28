@@ -1,0 +1,1 @@
+./../tb/dcasic_tb.sv

@@ -49,20 +49,20 @@ module dcasic
 
     // -- Instruction Memory
     localparam IMEM_ID_ADDR             = 3'h00;
-    localparam IMEM_BASE_ADDR           = {IMEM_ID_ADDR, 29'h0000_0000};        // Base address: 0x0000_000
+    localparam IMEM_BASE_ADDR           = {IMEM_ID_ADDR, 29'h0000_0000};        // Base address: 0x0000_0000
     // -- Display TX configuration Memory
     localparam DSP_CONF_ID_ADDR         = 3'h01;
-    localparam DSP_CONF_BASE_ADDR       = {DSP_CONF_ID_ADDR, 29'h0000_0000};    // Base address: 0x2000_000
+    localparam DSP_CONF_BASE_ADDR       = {DSP_CONF_ID_ADDR, 29'h0000_0000};    // Base address: 0x2000_0000
     localparam DSP_CONF_OFS             = 32'h01;                               // Offset: Byte
     // -- Camera RX configuration Memory
     localparam CAM_CONF_ID_ADDR         = 3'h02;
-    localparam CAM_CONF_BASE_ADDR       = {CAM_CONF_ID_ADDR, 29'h0000_0000};    // Base address: 0x4000_000
+    localparam CAM_CONF_BASE_ADDR       = {CAM_CONF_ID_ADDR, 29'h0000_0000};    // Base address: 0x4000_0000
     localparam CAM_CONF_OFS             = 32'h04;                               // Offset: Word
     // -- SCCB Master configuration Memory
     localparam SCCB_ID_ADDR             = 3'h03;
-    localparam SCCB_CONF_BASE_ADDR      = {SCCB_ID_ADDR, 29'h0000_0000};        // Base address: 0x6000_000
-    localparam SCCB_TX_BASE_ADDR        = {SCCB_ID_ADDR, 29'h0800_0000};        // Base address: 0x6800_000
-    localparam SCCB_RX_BASE_ADDR        = {SCCB_ID_ADDR, 29'h1800_0000};        // Base address: 0x7800_000
+    localparam SCCB_CONF_BASE_ADDR      = {SCCB_ID_ADDR, 29'h0000_0000};        // Base address: 0x6000_0000
+    localparam SCCB_TX_BASE_ADDR        = {SCCB_ID_ADDR, 29'h0800_0000};        // Base address: 0x6800_0000
+    localparam SCCB_RX_BASE_ADDR        = {SCCB_ID_ADDR, 29'h1800_0000};        // Base address: 0x7800_0000
     
     // Video BUS
     localparam VBUS_ID_W                = CONF_SLV_ID_W;
@@ -486,6 +486,7 @@ module dcasic
         .m_rready_i             (ics_rready[CAM_CONF_ID_ADDR]),
         .m_awready_o            (ics_awready[CAM_CONF_ID_ADDR]),
         .m_wready_o             (ics_wready[CAM_CONF_ID_ADDR]),
+        .m_bid_o                (ics_bid[CAM_CONF_ID_ADDR]),
         .m_bresp_o              (ics_bresp[CAM_CONF_ID_ADDR]),
         .m_bvalid_o             (ics_bvalid[CAM_CONF_ID_ADDR]),
         .m_arready_o            (ics_arready[CAM_CONF_ID_ADDR]),

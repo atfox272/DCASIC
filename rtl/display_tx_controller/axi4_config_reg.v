@@ -74,6 +74,7 @@ module axi4_config_reg
     output  [CONF_DATA_W-1:0]   addr_disp_on_o,
     output  [CONF_DATA_W-1:0]   addr_col_o,
     output  [CONF_DATA_W-1:0]   addr_row_o,
+    output  [CONF_DATA_W-1:0]   addr_acs_ctrl_o,    // MADCTL
     output  [CONF_DATA_W-1:0]   addr_mem_wr_o,
     output  [CONF_DATA_W-1:0]   cmd_s_col_h_o,
     output  [CONF_DATA_W-1:0]   cmd_s_col_l_o,
@@ -82,7 +83,8 @@ module axi4_config_reg
     output  [CONF_DATA_W-1:0]   cmd_s_row_h_o,
     output  [CONF_DATA_W-1:0]   cmd_s_row_l_o,
     output  [CONF_DATA_W-1:0]   cmd_e_row_h_o,
-    output  [CONF_DATA_W-1:0]   cmd_e_row_l_o
+    output  [CONF_DATA_W-1:0]   cmd_e_row_l_o,
+    output  [CONF_DATA_W-1:0]   cmd_acs_ctrl_o      // MADCTL
 );
     // Local parameters 
     localparam CONF_ADDR_NUM    = 1<<CONF_ADDR_W;
@@ -222,6 +224,8 @@ module axi4_config_reg
     assign cmd_s_row_l_o    = ip_config_reg[8'h0B];
     assign cmd_e_row_h_o    = ip_config_reg[8'h0C];
     assign cmd_e_row_l_o    = ip_config_reg[8'h0D];
+    assign addr_acs_ctrl_o  = ip_config_reg[8'h0E];
+    assign cmd_acs_ctrl_o   = ip_config_reg[8'h0F];
     assign {m_rid_o, m_rresp_o, m_rdata_o} = fwd_r_info;
     generate 
     for(conf_idx = 0; conf_idx < CONF_ADDR_NUM; conf_idx = conf_idx + 1) begin

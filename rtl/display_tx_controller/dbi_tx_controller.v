@@ -95,6 +95,7 @@ module dbi_tx_controller
     wire    [DBI_IF_D_W-1:0]    addr_disp_on;
     wire    [DBI_IF_D_W-1:0]    addr_col;
     wire    [DBI_IF_D_W-1:0]    addr_row;
+    wire    [DBI_IF_D_W-1:0]    addr_acs_ctrl;
     wire    [DBI_IF_D_W-1:0]    addr_mem_wr;
     wire    [DBI_IF_D_W-1:0]    cmd_s_col_h;
     wire    [DBI_IF_D_W-1:0]    cmd_s_col_l;
@@ -104,6 +105,7 @@ module dbi_tx_controller
     wire    [DBI_IF_D_W-1:0]    cmd_s_row_l;
     wire    [DBI_IF_D_W-1:0]    cmd_e_row_h;
     wire    [DBI_IF_D_W-1:0]    cmd_e_row_l;
+    wire    [DBI_IF_D_W-1:0]    cmd_acs_ctrl;
 
     wire                        dtp_d_rdy;
     wire                        dtp_d_vld;
@@ -159,6 +161,7 @@ module dbi_tx_controller
         .addr_disp_on_o     (addr_disp_on),
         .addr_col_o         (addr_col),
         .addr_row_o         (addr_row),
+        .addr_acs_ctrl_o    (addr_acs_ctrl),
         .addr_mem_wr_o      (addr_mem_wr),
         .cmd_s_col_h_o      (cmd_s_col_h),
         .cmd_s_col_l_o      (cmd_s_col_l),
@@ -167,7 +170,8 @@ module dbi_tx_controller
         .cmd_s_row_h_o      (cmd_s_row_h),
         .cmd_s_row_l_o      (cmd_s_row_l),
         .cmd_e_row_h_o      (cmd_e_row_h),
-        .cmd_e_row_l_o      (cmd_e_row_l)
+        .cmd_e_row_l_o      (cmd_e_row_l),
+        .cmd_acs_ctrl_o     (cmd_acs_ctrl)
 
     );
 
@@ -222,6 +226,7 @@ module dbi_tx_controller
         .addr_disp_on_i     (addr_disp_on),
         .addr_col_i         (addr_col),
         .addr_row_i         (addr_row),
+        .addr_acs_ctrl_i    (addr_acs_ctrl),
         .addr_mem_wr_i      (addr_mem_wr),
         .cmd_s_col_h_i      (cmd_s_col_h),
         .cmd_s_col_l_i      (cmd_s_col_l),
@@ -231,6 +236,7 @@ module dbi_tx_controller
         .cmd_s_row_l_i      (cmd_s_row_l),
         .cmd_e_row_h_i      (cmd_e_row_h),
         .cmd_e_row_l_i      (cmd_e_row_l),
+        .cmd_acs_ctrl_i     (cmd_acs_ctrl),
         .pxl_d_i            (rgb_pxl_dat),
         .pxl_vld_i          (rgb_pxl_vld),
         .dtp_tx_rdy_i       (dtp_tx_rdy),
