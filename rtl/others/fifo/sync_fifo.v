@@ -281,7 +281,7 @@ else if(FIFO_TYPE == 3) begin : CONCAT_FIFO
     assign wr_hsk       = wr_valid_i & wr_ready_o;
     assign rd_hsk       = rd_valid_i & rd_ready_o;
     assign sml_full     = ~|(sml_cnt ^ (CAT_NUM-1));
-    for(sml_idx = 0; sml_idx < CAT_NUM; sml_idx = sml_idx + 1) begin
+    for(sml_idx = 0; sml_idx < CAT_NUM; sml_idx = sml_idx + 1) begin : OUT_FLAT
         if(CONCAT_ORDER == "LSB") begin
             assign data_o[IN_DATA_WIDTH*(sml_idx+1)-1-:IN_DATA_WIDTH] = buffer[sml_idx];
         end
@@ -348,7 +348,7 @@ else if(FIFO_TYPE == 4) begin : DECONCAT_FIFO
     assign buf_ocp      = wr_ptr ^ rd_ptr;
     assign wr_hsk       = wr_valid_i & wr_ready_o;
     assign rd_hsk       = rd_valid_i & rd_ready_o;
-    for(sml_idx = 0; sml_idx < CAT_NUM; sml_idx = sml_idx + 1) begin
+    for(sml_idx = 0; sml_idx < CAT_NUM; sml_idx = sml_idx + 1) begin : BUF_MAP
         assign data_map[sml_idx] = buffer[OUT_DATA_WIDTH*(sml_idx+1)-1-:OUT_DATA_WIDTH];
     end
     // Flip-flop

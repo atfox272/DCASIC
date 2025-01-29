@@ -7,23 +7,84 @@ addi x5, x5, 0x00
 addi x4, x0, 0x23
 sb x4, 0(x5)
 
-# 2. Add sub-address of a SCCB transmission
+# 2. Soft-reset
+## Add sub-address of a SCCB transmission (0x12)
 lui x5,0x68000
 addi x5, x5, 0x01
-addi x4, x0, 0x27
+addi x4, x0, 0x12
 sb x4, 0(x5)
-
-# 3. Add write data of a SCCB transmission
+## Add write data of a SCCB transmission (0x80)
 lui x5,0x68000
 addi x5, x5, 0x02
-addi x4, x0, 0x02
+addi x4, x0, 0b10000000
 sb x4, 0(x5)
-
-# 4. Start a SCCB Master Controller with a 3-phase write transmission
+## Start a SCCB Master Controller with a 3-phase write transmission
 lui x5,0x68000
 addi x5, x5, 0x00
 addi x4, x0, 0b00000111
 sb x4, 0(x5)
+
+# 3. Wait for 1 ms (BOUNDARY = CLK_FREQ/(1/(10^(-3))) / 25)
+## 125Mhz: 0x1388 (0d5000)
+lui x7, 0x0010
+FLAG_0:
+addi x7, x7, -0x01
+bne x7, x0, FLAG_0
+
+# 4. COM7
+## Add sub-address of a SCCB transmission (0x12)
+lui x5,0x68000
+addi x5, x5, 0x01
+addi x4, x0, 0x12
+sb x4, 0(x5)
+## Add write data of a SCCB transmission (0x04)
+lui x5,0x68000
+addi x5, x5, 0x02
+addi x4, x0, 0b00000100
+sb x4, 0(x5)
+## Start a SCCB Master Controller with a 3-phase write transmission
+lui x5,0x68000
+addi x5, x5, 0x00
+addi x4, x0, 0b00000111
+sb x4, 0(x5)
+
+# 5. CLKRC
+## Add sub-address of a SCCB transmission (0x11)
+lui x5,0x68000
+addi x5, x5, 0x01
+addi x4, x0, 0x11
+sb x4, 0(x5)
+## Add write data of a SCCB transmission (0xC0)
+lui x5,0x68000
+addi x5, x5, 0x02
+addi x4, x0, 0b11000000
+sb x4, 0(x5)
+## Start a SCCB Master Controller with a 3-phase write transmission
+lui x5,0x68000
+addi x5, x5, 0x00
+addi x4, x0, 0b00000111
+sb x4, 0(x5)
+
+# 6. COM15
+## Add sub-address of a SCCB transmission (0x40)
+lui x5,0x68000
+addi x5, x5, 0x01
+addi x4, x0, 0x40
+sb x4, 0(x5)
+## Add write data of a SCCB transmission (0xD0)
+lui x5,0x68000
+addi x5, x5, 0x02
+addi x4, x0, 0b11010000
+sb x4, 0(x5)
+## Start a SCCB Master Controller with a 3-phase write transmission
+lui x5,0x68000
+addi x4, x0, 0b00000111
+sb x4, 0(x5)
+
+# 7. Wait for all SCCB transactions to send
+FLAG_1:
+lb x4, 0(x5)
+bne x4, x0, FLAG_1
 ####### Configure the SCCB Master Controller ########
 #####################################################
 
@@ -113,10 +174,10 @@ sb x4, 0(x5)
 # 11. Waiting for 120ms (BOUNDARY = CLK_FREQ/(1/(120*10^(-3))) / 25)
 # 125Mhz: 600_000 (0x0009_27C0)
 # 
-lui x7, 0x08
-FLAG:
+lui x7, 0x11
+FLAG_2:
 addi x7, x7, -0x01
-bne x7, x0, FLAG
+bne x7, x0, FLAG_2
 #####################################################
 ######### Configure the DVP RX Controller ###########
 # 1. PXL_MEM_BASE_REG
@@ -130,5 +191,6 @@ lui x5,0x40000
 addi x5, x5, 0x0
 addi x4, x0, 0b00000001
 sw x4, 0(x5)
+
 EXIT:
 beq x0, x0, EXIT

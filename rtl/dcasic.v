@@ -2,7 +2,7 @@
 
 module dcasic 
 #(
-    parameter INTERNAL_CLK      = 125_000_000,
+    parameter INTERNAL_CLK      = 50_000_000,
     // DVP Interface
     parameter DVP_DATA_W        = 8,
     // DBI Interface
@@ -18,7 +18,7 @@ module dcasic
     input   [DVP_DATA_W-1:0]    dvp_d_i,
     input                       dvp_href_i,
     input                       dvp_vsync_i,
-    input                       dvp_hsync_i,
+    // input                       dvp_hsync_i,
     input                       dvp_pclk_i,
     output                      dvp_xclk_o,
     // Display TX Interface
@@ -202,6 +202,8 @@ module dcasic
     wire    [VBUS_RESP_W-1:0]                       dvp_dbi_bresp;
     wire                                            dvp_dbi_bvalid;
     wire                                            dvp_dbi_bready;
+    // -- RX
+    wire                                            dvp_hsync;
 
     // IP instantiation
     // -- Processor
@@ -461,7 +463,8 @@ module dcasic
         .TRANS_DATA_LEN_W       (CONF_TX_DAT_LEN_W),
         .TRANS_DATA_SIZE_W      (CONF_TX_DAT_SZ_W),
         .TRANS_RESP_W           (CONF_TX_RESP_W),
-        .TX_DATA_W              (VBUS_DATA_W)
+        .TX_DATA_W              (VBUS_DATA_W),
+        .INTERNAL_CLK           (INTERNAL_CLK)
     ) crc (
         .clk                    (sys_clk),
         .rst_n                  (rst_n),
@@ -469,7 +472,7 @@ module dcasic
         .dvp_d_i                (dvp_d_i),
         .dvp_href_i             (dvp_href_i),
         .dvp_vsync_i            (dvp_vsync_i),
-        .dvp_hsync_i            (dvp_hsync_i),
+        .dvp_hsync_i            (dvp_hsync),
         .dvp_pclk_i             (dvp_pclk_i),
         .dvp_xclk_o             (dvp_xclk_o),
         .dvp_pwdn_o             (dvp_pwdn_o),
@@ -565,9 +568,9 @@ module dcasic
     assign icm_awlen[0] = {CONF_TX_DAT_LEN_W{1'b0}};
     assign icm_arlen[0] = {CONF_TX_DAT_LEN_W{1'b0}};
     assign icm_wlast[0] = 1'b1;
+    assign dvp_hsync    = dvp_href_i;   // HREF and HSYNC share same pin
     generate
-        // -- To Master
-        for(mst_idx = 0; mst_idx < CONF_MST_AMT; mst_idx = mst_idx + 1) begin
+        for(mst_idx = 0; mst_idx < CONF_MST_AMT; mst_idx = mst_idx + 1) begin   : AXI4_MST
             assign icm_awid_flat[CONF_MST_ID_W*(mst_idx+1)-1-:CONF_MST_ID_W]            = icm_awid[mst_idx];
             assign icm_awaddr_flat[CONF_ADDR_W*(mst_idx+1)-1-:CONF_ADDR_W]              = icm_awaddr[mst_idx];
             assign icm_awburst_flat[CONF_TX_BURST_W*(mst_idx+1)-1-:CONF_TX_BURST_W]     = icm_awburst[mst_idx];
@@ -597,8 +600,7 @@ module dcasic
             assign icm_rlast[mst_idx]                                                   = icm_rlast_flat[mst_idx]; 
             assign icm_rvalid[mst_idx]                                                  = icm_rvalid_flat[mst_idx];
         end
-        // -- To Slave
-        for(slv_idx = 0; slv_idx < CONF_SLV_AMT; slv_idx = slv_idx + 1) begin
+        for(slv_idx = 0; slv_idx < CONF_SLV_AMT; slv_idx = slv_idx + 1) begin   : AXI4_SLV
             assign ics_awready_flat[slv_idx]                                            = ics_awready[slv_idx];
             assign ics_wready_flat[slv_idx]                                             = ics_wready[slv_idx];
             assign ics_bid_flat[CONF_SLV_ID_W*(slv_idx+1)-1-:CONF_SLV_ID_W]             = ics_bid[slv_idx];

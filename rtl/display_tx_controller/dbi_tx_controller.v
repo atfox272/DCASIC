@@ -204,7 +204,9 @@ module dbi_tx_controller
     );
 
     gray_to_rgb #(
-
+        .GRAY_PXL_W         (8),
+        .RGB_PXL_W          (16),
+        .RGB_SPLIT_W        (8)
     ) g2r (
         .clk                (clk),
         .rst_n              (rst_n),

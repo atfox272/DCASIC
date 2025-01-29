@@ -1,5 +1,9 @@
 module dvp_rx_controller
 #(
+    // System
+    parameter INTERNAL_CLK          = 125_000_000,
+    // Downscaler
+    parameter DOWNSCALE_TYPE        = 1,    // 0: AveragePooling || 1" MaxPooling
     // AXI configuration
     // -- For AXI4 Slave interface  (DVP Configuration)
     parameter DATA_W                = 32,
@@ -116,7 +120,8 @@ module dvp_rx_controller
     assign dvp_cam_pwdn = dvp_cam_conf[5'h01];  // Power down
 
     dvp_camera_controller #(
-    
+        .INTL_CLK_PERIOD(INTERNAL_CLK),
+        .DVP_CAM_CFG_W  (DATA_W)
     ) dcc (
         .clk            (clk),
         .rst_n          (rst_n),
@@ -125,9 +130,7 @@ module dvp_rx_controller
         .dvp_pwdn_o     (dvp_pwdn_o)
     );
     
-    dvp_pclk_sync #(
-    
-    ) dps (
+    dvp_pclk_sync dps (
         .clk            (clk),
         .rst_n          (rst_n),
         .dvp_pclk_i     (dvp_pclk_i),
@@ -135,7 +138,10 @@ module dvp_rx_controller
     );
     
     dvp_state_machine #(
-    
+        .DVP_DATA_W     (DVP_DATA_W),
+        .PXL_INFO_W     (PXL_INFO_W),
+        .RGB_PXL_W      (RGB_PXL_W),
+        .GS_PXL_W       (GS_PXL_W)
     ) dsm (
         .clk            (clk),
         .rst_n          (rst_n),
@@ -186,7 +192,9 @@ module dvp_rx_controller
     );
     
     pixel_fifo #(
-    
+        .DVP_DATA_W     (DVP_DATA_W),
+        .PXL_INFO_W     (PXL_INFO_W),
+        .PXL_FIFO_D     (32)
     ) pf (
         .clk            (clk),
         .rst_n          (rst_n),
@@ -202,7 +210,8 @@ module dvp_rx_controller
     );
     
     pixel_gray_scale #(
-    
+        .RGB_PXL_W      (RGB_PXL_W),
+        .GS_PXL_W       (GS_PXL_W)
     ) pgs (
         .rgb_pxl_i       (dsm_pgs_pxl),   
         .rgb_pxl_vld_i   (dsm_pgs_pxl_vld),
@@ -213,7 +222,8 @@ module dvp_rx_controller
     );
     
     pixel_downscaler_fifo #(
-    
+        .DOWNSCALE_TYPE (DOWNSCALE_TYPE),
+        .GS_PXL_W       (GS_PXL_W)
     ) pdf (
         .clk            (clk),
         .rst_n          (rst_n),

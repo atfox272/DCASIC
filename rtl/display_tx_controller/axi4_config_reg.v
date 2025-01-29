@@ -228,7 +228,7 @@ module axi4_config_reg
     assign cmd_acs_ctrl_o   = ip_config_reg[8'h0F];
     assign {m_rid_o, m_rresp_o, m_rdata_o} = fwd_r_info;
     generate 
-    for(conf_idx = 0; conf_idx < CONF_ADDR_NUM; conf_idx = conf_idx + 1) begin
+    for(conf_idx = 0; conf_idx < CONF_ADDR_NUM; conf_idx = conf_idx + 1) begin  : ADDR_MAP
         assign awaddr_map_vld[conf_idx] = ~|(fwd_awaddr ^ (BASE_ADDR+conf_idx*CONF_OFFSET));
         assign araddr_map_vld[conf_idx] = ~|(fwd_araddr ^ (BASE_ADDR+conf_idx*CONF_OFFSET));
     end
@@ -250,7 +250,7 @@ module axi4_config_reg
     assign {fwd_awid, fwd_awaddr} = fwd_aw_info;
     // Flip-flop
     generate 
-    for(conf_idx = 0; conf_idx < CONF_ADDR_NUM; conf_idx = conf_idx + 1) begin
+    for(conf_idx = 0; conf_idx < CONF_ADDR_NUM; conf_idx = conf_idx + 1) begin  : CONF_REG
     always @(posedge clk or negedge rst_n) begin
         if(~rst_n) begin
             ip_config_reg[conf_idx] <= {DATA_W{1'b0}};

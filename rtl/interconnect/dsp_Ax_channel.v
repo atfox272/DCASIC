@@ -148,7 +148,7 @@ module dsp_Ax_channel
     // -- Output 
     // -- -- Output to Slave Arbitration
     generate 
-        for(slv_idx = 0; slv_idx < SLV_AMT; slv_idx = slv_idx + 1) begin
+        for(slv_idx = 0; slv_idx < SLV_AMT; slv_idx = slv_idx + 1) begin : SLV_LOGIC
             assign sa_AxID_o[TRANS_MST_ID_W*(slv_idx+1)-1-:TRANS_MST_ID_W]          = msb_fwd_AxID;
             assign sa_AxADDR_o[ADDR_WIDTH*(slv_idx+1)-1-:ADDR_WIDTH]                = msb_fwd_AxADDR;
             assign sa_AxBURST_o[TRANS_BURST_W*(slv_idx+1)-1-:TRANS_BURST_W]         = msb_fwd_AxBURST;

@@ -291,7 +291,7 @@ module axi_interconnect
     generate
         // Port mapping (de-flatten)
         // -- To Master
-        for(mst_idx = 0; mst_idx < MST_AMT; mst_idx = mst_idx + 1) begin
+        for(mst_idx = 0; mst_idx < MST_AMT; mst_idx = mst_idx + 1) begin : MST_DEFLAT
             // -- -- AW channel
             // -- -- -- Input
             assign m_AWID[mst_idx]                                          = m_AWID_i[TRANS_MST_ID_W*(mst_idx+1)-1-:TRANS_MST_ID_W];
@@ -337,7 +337,7 @@ module axi_interconnect
             assign m_RVALID_o[mst_idx]                                      = m_RVALID[mst_idx];
         end
         // -- To Slave
-        for(slv_idx = 0; slv_idx < SLV_AMT; slv_idx = slv_idx + 1) begin
+        for(slv_idx = 0; slv_idx < SLV_AMT; slv_idx = slv_idx + 1) begin : SLV_DEFLAT
             // -- -- AW channel
             // -- -- -- Input
             assign s_AWREADY[slv_idx]                                               = s_AWREADY_i[slv_idx];
@@ -383,8 +383,8 @@ module axi_interconnect
             assign s_RREADY_o[slv_idx]                                              = s_RREADY[slv_idx];
         end
         // -- Internal connectio 
-        for(mst_idx = 0; mst_idx < MST_AMT; mst_idx = mst_idx + 1) begin
-            for(slv_idx = 0; slv_idx < SLV_AMT; slv_idx = slv_idx + 1) begin
+        for(mst_idx = 0; mst_idx < MST_AMT; mst_idx = mst_idx + 1) begin : NETWORK_CONNECTION
+            for(slv_idx = 0; slv_idx < SLV_AMT; slv_idx = slv_idx + 1) begin : SUB_NETWORK_CONNECTION
             // -- -- Slave Arbitration to Dispatcher
             assign dsp_sa_AWREADY_i[mst_idx][slv_idx]                                           = sa_dsp_AWREADY_o[slv_idx][mst_idx];
             assign dsp_sa_WREADY_i[mst_idx][slv_idx]                                            = sa_dsp_WREADY_o[slv_idx][mst_idx];
@@ -423,7 +423,7 @@ module axi_interconnect
     
     // Internal module
     generate
-        for(mst_idx = 0; mst_idx < MST_AMT; mst_idx = mst_idx + 1) begin
+        for(mst_idx = 0; mst_idx < MST_AMT; mst_idx = mst_idx + 1) begin : DSP_GEN
             ai_dispatcher #(
                 .SLV_AMT(SLV_AMT),
                 .OUTSTANDING_AMT(OUTSTANDING_AMT),
@@ -501,7 +501,7 @@ module axi_interconnect
                 .sa_RREADY_o(dsp_sa_RREADY_o[mst_idx])
             );
         end
-        for(slv_idx = 0; slv_idx < SLV_AMT; slv_idx = slv_idx + 1) begin
+        for(slv_idx = 0; slv_idx < SLV_AMT; slv_idx = slv_idx + 1) begin : SA_GEN
             if(MST_AMT > 1) begin   // Multiple masters -> Need arbitrate between masters
                 ai_slave_arbitration #(
                     .MST_AMT(MST_AMT),

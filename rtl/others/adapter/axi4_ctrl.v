@@ -299,16 +299,16 @@ module axi4_ctrl
 generate
 if(AXI4_CTRL_CONF == 1) begin : AXI4_CONF
     // Combination logic
-    for(conf_idx = 0; conf_idx < CONF_REG_NUM; conf_idx = conf_idx + 1) begin
+    for(conf_idx = 0; conf_idx < CONF_REG_NUM; conf_idx = conf_idx + 1) begin : CONF_REG_FLAT
         assign conf_reg_o[(conf_idx+1)*CONF_DATA_W-1 -: CONF_DATA_W] = ip_config_reg[conf_idx];
     end
-    for(conf_idx = 0; conf_idx < CONF_REG_NUM; conf_idx = conf_idx + 1) begin
+    for(conf_idx = 0; conf_idx < CONF_REG_NUM; conf_idx = conf_idx + 1) begin : ADDR_MAP
         assign conf_aw_map_vld[conf_idx] = ~|((fwd_awaddr + wdata_cnt<<(CONF_OFFSET-1)) ^ (CONF_BASE_ADDR+conf_idx*CONF_OFFSET));    // Check if the address is in the configuration region
         assign conf_ar_map_vld[conf_idx] = ~|((fwd_araddr + rdata_cnt<<(CONF_OFFSET-1)) ^ (CONF_BASE_ADDR+conf_idx*CONF_OFFSET));    // Check if the address is in the configuration region
     end
     
     // Flip-flop
-    for(conf_idx = 0; conf_idx < CONF_REG_NUM; conf_idx = conf_idx + 1) begin
+    for(conf_idx = 0; conf_idx < CONF_REG_NUM; conf_idx = conf_idx + 1) begin : CONF_REG_LOAD
     always @(posedge clk or negedge rst_n) begin
         if(~rst_n) begin
             ip_config_reg[conf_idx] <= {DATA_W{1'b0}};
@@ -331,7 +331,7 @@ if(AXI4_CTRL_WR_ST == 1) begin : AXI4_WR_ST
         - Read:     return number of data in the write-streaming FIFO 
     */
     // Module instantiation
-    for(fifo_idx = 0; fifo_idx < ST_WR_FIFO_NUM; fifo_idx = fifo_idx + 1) begin
+    for(fifo_idx = 0; fifo_idx < ST_WR_FIFO_NUM; fifo_idx = fifo_idx + 1) begin : TX_FIFO_GEN
         // -- Write streaming FIFO
         sync_fifo #(
             .FIFO_TYPE      (1),    // Normal FIFO  
@@ -377,7 +377,7 @@ if(AXI4_CTRL_WR_ST == 1) begin : AXI4_WR_ST
     end
     // Comninational logic
     assign wr_st_wr_rdy = wr_st_fifo_wr_rdy[wr_st_aw_map_idx];
-    for(fifo_idx = 0; fifo_idx < ST_WR_FIFO_NUM; fifo_idx = fifo_idx + 1) begin
+    for(fifo_idx = 0; fifo_idx < ST_WR_FIFO_NUM; fifo_idx = fifo_idx + 1) begin : TX_LOGIC
         assign wr_st_rd_data_o[(fifo_idx+1)*DATA_W-1 -: DATA_W] = wr_st_rd_data[fifo_idx];
         assign wr_st_aw_map_vld[fifo_idx] = ~|(fwd_awaddr ^ (ST_WR_BASE_ADDR+fifo_idx*ST_WR_OFFSET));    // Check if the address is in the write-stream FIFO region
         assign wr_st_fifo_wr_vld[fifo_idx] = mem_wr_en & wr_st_aw_map_vld[fifo_idx];
@@ -398,7 +398,7 @@ if(AXI4_CTRL_RD_ST == 1) begin : AXI4_RD_ST
     */
     // Module instantiation
     // -- Read streaming FIFO
-    for(fifo_idx = 0; fifo_idx < ST_RD_FIFO_NUM; fifo_idx = fifo_idx + 1) begin
+    for(fifo_idx = 0; fifo_idx < ST_RD_FIFO_NUM; fifo_idx = fifo_idx + 1) begin : RX_FIFO_GEN
         sync_fifo #(
             .FIFO_TYPE      (1),    // Normal FIFO  
             .DATA_WIDTH     (DATA_W),      
@@ -434,7 +434,7 @@ if(AXI4_CTRL_RD_ST == 1) begin : AXI4_RD_ST
     end
     // Combination logic
     assign rd_st_rd_rdy = ~(|rd_st_ar_map_vld) | rd_st_fifo_rd_rdy[rd_st_ar_map_idx];   // If the address is in the read-streaming FIFO region, then return the read-streaming FIFO ready signal
-    for(fifo_idx = 0; fifo_idx < ST_RD_FIFO_NUM; fifo_idx = fifo_idx + 1) begin
+    for(fifo_idx = 0; fifo_idx < ST_RD_FIFO_NUM; fifo_idx = fifo_idx + 1) begin : RX_LOGIC_GEN
         assign rd_st_wr_data[fifo_idx] = rd_st_wr_data_i[(fifo_idx+1)*DATA_W-1 -: DATA_W];
         assign rd_st_ar_map_vld[fifo_idx] = ~|(fwd_araddr ^ (ST_RD_BASE_ADDR+fifo_idx*ST_RD_OFFSET));    // Check if the address is in the read-stream FIFO region
         assign rd_st_fifo_rd_vld[fifo_idx] = (bwd_r_vld & bwd_r_rdy) & rd_st_ar_map_vld[fifo_idx];

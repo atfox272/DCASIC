@@ -116,10 +116,10 @@ module sccb_master_controller #(
 
     // De-flattern
 generate
-    for(tx_fifo_idx = 0; tx_fifo_idx < SCCB_TX_FIFO_NUM; tx_fifo_idx = tx_fifo_idx + 1) begin
+    for(tx_fifo_idx = 0; tx_fifo_idx < SCCB_TX_FIFO_NUM; tx_fifo_idx = tx_fifo_idx + 1) begin : TX_LOGIC_GEN
         assign tx_fifo_dat[tx_fifo_idx] = tx_fifo_flat[(tx_fifo_idx+1)*DATA_W-1-:DATA_W];
     end
-    for(conf_reg_idx = 0; conf_reg_idx < CONFIG_REG_NUM; conf_reg_idx = conf_reg_idx + 1) begin
+    for(conf_reg_idx = 0; conf_reg_idx < CONFIG_REG_NUM; conf_reg_idx = conf_reg_idx + 1) begin : CONF_LOGIC_GEN
         assign conf_reg[conf_reg_idx] = conf_reg_flat[(conf_reg_idx+1)*DATA_W-1-:DATA_W];
     end
 endgenerate
@@ -182,7 +182,7 @@ endgenerate
         .m_rvalid_o         (m_rvalid_o),
         .conf_reg_o         (conf_reg_flat),
         .mem_wr_data_o      (),
-        .mem_wr_addr_o      (),
+        .mem_wr_addr_o      (), 
         .mem_wr_vld_o       (),
         .mem_rd_addr_o      (),
         .mem_rd_vld_o       (),

@@ -1,6 +1,6 @@
 module dvp_camera_controller
 #(
-    parameter INTL_CLK_PERIOD   = 125000000,
+    parameter INTL_CLK_PERIOD   = 125_000_000,
     parameter DVP_CAM_CFG_W     = 32 // DVP Camera configuration register
 )
 (

@@ -1,7 +1,7 @@
 module pixel_downscaler_fifo
 #(
     // Downscaler method configuration 
-    parameter DOWNSCALE_TYPE    = 1,    // 0--AveragePooling, 1--MaxPooling
+    parameter DOWNSCALE_TYPE    = 1,    // 0: AveragePooling || 1" MaxPooling
     // Pixel configuration
     parameter GS_PXL_W          = 8,
     parameter COL_NUM           = 640,

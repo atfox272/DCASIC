@@ -1,3 +1,7 @@
 dcasic*/
 dcasic.xpr
 sim/dcasic/
+quartus/
+sim/qrun*
+sim/viscom*
+rp/

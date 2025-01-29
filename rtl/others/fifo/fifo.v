@@ -52,7 +52,7 @@ module fifo
     
     assign counter = wr_addr - rd_addr;
     generate
-        for(addr = 0; addr < FIFO_DEPTH; addr = addr + 1) begin
+        for(addr = 0; addr < FIFO_DEPTH; addr = addr + 1) begin : BUF_NXT_GEN
             assign buffer_nxt[addr] = (wr_addr_map == addr) ? data_i : buffer[addr];
         end
     endgenerate
@@ -60,7 +60,7 @@ module fifo
     // flip-flop logic
     // -- Buffer updater
     generate
-        for(addr = 0; addr < FIFO_DEPTH; addr = addr + 1) begin
+        for(addr = 0; addr < FIFO_DEPTH; addr = addr + 1) begin : BUF_LOAD
             always @(posedge clk) begin
                 if(!rst_n) begin 
                     buffer[addr] <= {DATA_WIDTH{1'b0}};

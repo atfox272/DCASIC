@@ -53,8 +53,10 @@ module dbi_tx_fsm
 
     localparam NOP_CMD          = 8'h00;
     localparam RST_STALL_SEC    = 5e-3;
-    localparam RST_STALL_CYC    = $rtoi(RST_STALL_SEC*INTERNAL_CLK);
-    localparam RST_STALL_W      = $clog2(RST_STALL_CYC);
+    localparam integer SCALE_FACTOR     = 1000; // Use to convert RST_STALL_SEC to a integer
+    localparam integer RST_STALL_SEC_INT= RST_STALL_SEC * SCALE_FACTOR; // Convert RST_STALL_SEC_INT to a integer
+    localparam integer RST_STALL_CYC    = (RST_STALL_SEC_INT * INTERNAL_CLK) / SCALE_FACTOR;    // Return integer
+    localparam integer RST_STALL_W      = $clog2(RST_STALL_CYC);
 
     localparam DBI_TX_PER_TXN   = 153600;
     localparam DBI_TX_CNT_W     = $clog2(DBI_TX_PER_TXN);
@@ -63,10 +65,10 @@ module dbi_tx_fsm
     // -- wire
     reg     [2:0]               dbi_tx_st_d;
     reg     [RST_STALL_W-1:0]   rst_stall_cnt_d;
-    reg                         dtp_dbi_hrst  ;
-    reg     [DBI_IF_D_W-1:0]    dtp_tx_cmd_typ  ;
-    reg     [DBI_IF_D_W-1:0]    dtp_tx_cmd_dat  ;
-    reg                         dtp_tx_last  ;
+    reg                         dtp_dbi_hrst;
+    reg     [DBI_IF_D_W-1:0]    dtp_tx_cmd_typ;
+    reg     [DBI_IF_D_W-1:0]    dtp_tx_cmd_dat;
+    reg                         dtp_tx_last;
     reg                         dtp_tx_vld;
     reg     [DBI_TX_CNT_W-1:0]  dbi_tx_cnt_d;
     reg                         dtp_tx_no_dat  ;
