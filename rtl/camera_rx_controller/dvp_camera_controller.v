@@ -39,7 +39,7 @@ module dvp_camera_controller
     assign cam_pwdn     = dcr_cam_cfg_i[5'h01];
     assign cam_presc    = dcr_cam_cfg_i[1:0];
     assign presc_ctn_ex = (presc_ctn_q == PRES_CTN_MAX-1);
-    assign xclk_toggle  = (presc_ctn_q == PRES_CTN_MAX/2 - 1);
+    assign xclk_toggle  = (presc_ctn_q == PRES_CTN_MAX/2 - 1) & cam_start;
     assign presc_ctn_d  = (cam_start & !presc_ctn_ex) ? presc_ctn_q + 1'b1 : {PRESC_CTN_W{1'b0}};
     
     // Flip-flop
