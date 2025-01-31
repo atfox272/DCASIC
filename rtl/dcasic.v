@@ -464,7 +464,8 @@ module dcasic
         .TRANS_DATA_SIZE_W      (CONF_TX_DAT_SZ_W),
         .TRANS_RESP_W           (CONF_TX_RESP_W),
         .TX_DATA_W              (VBUS_DATA_W),
-        .INTERNAL_CLK           (INTERNAL_CLK)
+        .INTERNAL_CLK           (INTERNAL_CLK),
+        .DOWNSCALE_TYPE         (1) // Max Pooling 
     ) crc (
         .clk                    (sys_clk),
         .rst_n                  (rst_n),

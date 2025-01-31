@@ -1,18 +1,12 @@
-TEST_MODULE?=dcasic
+.PHONY: all step1 step2 step3
 
-ifeq ($(OS),Windows_NT)
-	RM_CMD = powershell if (Test-Path $(TEST_MODULE)) { Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $(TEST_MODULE) }
-else
-	RM_CMD = rm -rf $(TEST_MODULE)
-endif
+all: input_gen sim output_anal
 
-all: clean run_sim
+input_gen:
+	python dut_env/dut_input/img2txt.py
 
-run_sim: clean
-	mkdir $(TEST_MODULE)
-	qrun -verbose -lint=default -parallel -vlog.sv -vopt.access=rw+/. -f rtl.f -f tb.f -top $(TEST_MODULE)_tb -outdir $(TEST_MODULE) -l $(TEST_MODULE)/qrun.log -designfile $(TEST_MODULE)/$(TEST_MODULE).bin -qwavedb=+memory=all+assertion+signal+cell+class+wavefile=$(TEST_MODULE)/$(TEST_MODULE).db
+sim:
+	$(MAKE) -f tool_run
 
-clean:
-	$(RM_CMD)
-
-.PHONY: all clean
+output_anal:
+	python dut_env/dut_output/txt2img.py

@@ -5,7 +5,7 @@
 `define RST_DLY_START   3
 `define RST_DUR         9
 
-`define END_TIME        37500000
+`define END_TIME        14500000
 
 // DVP Physical characteristic
 // -- t_PDV = 5 ns = (5/INTERNAL_CLK_PERIOD)*DUT_CLK_PERIOD = (5/8)*2
@@ -109,7 +109,12 @@ module dcasic_tb;
     int pclk_cnt    = 0;
     int dvp_st      = 0;
     int tx_cnt      = 0;
-    
+    reg [15:0] input_img [0:640*480-1];
+
+    initial begin
+        $readmemh("L:/Projects/dcasic/sim/dut_env/dut_input/img_txt.txt", input_img);
+    end
+
     task automatic pclk_cl;
         @(negedge dvp_xclk_o);
         #(`DVP_PCLK_DLY); 
@@ -183,13 +188,15 @@ module dcasic_tb;
                             else begin
                                 dvp_st      = DVP_TX_ST;
                                 dvp_href_i  <= 1'b1;
-                                dvp_d_i     <= tx_cnt%32;
+                                // dvp_d_i     <= tx_cnt%32;
+                                dvp_d_i     <= (tx_cnt%2 == 0) ? input_img[tx_cnt/2][15:8] : input_img[tx_cnt/2][7:0];
+                                
                             end
                         end
                     end
                     DVP_TX_ST: begin
                         tx_cnt = tx_cnt + 1;
-                        dvp_d_i     <= tx_cnt%32;
+                        dvp_d_i <= (tx_cnt%2 == 0) ? input_img[tx_cnt/2][15:8] : input_img[tx_cnt/2][7:0];
                         if(tx_cnt%(640*2) == 0) begin
                             dvp_st      = DVP_PRE_HSYNC_FALL_ST;
                             pclk_cnt    = 19*2;
@@ -222,6 +229,44 @@ module dcasic_tb;
 
     
     /* ------------------------------ DBI TX Controller ------------------------------ */ 
+    // TODO: Implement a DBI FSM Monitor
+    localparam DBI_IMG_IDLE     = 2'd0;
+    localparam DBI_IMG_TX       = 2'd1; 
+
+    reg [15:0] output_img [0:320*240-1];
+
+    int dbi_img_rc_st           = DBI_IMG_IDLE;
+    int dbi_d_cnt               = 0;
+    always @(posedge dbi_wrx_o) begin
+        case(dbi_img_rc_st)
+            DBI_IMG_IDLE: begin
+                if((dbi_d_o == 8'h2C) & (dbi_dcx_o == 1'b0)) begin  // DBI_TX request to write data into frame buffer
+                    dbi_img_rc_st <= DBI_IMG_TX;
+                    dbi_d_cnt <= 0;
+                end
+            end
+            DBI_IMG_TX: begin
+                if(dbi_d_cnt%2 == 0) begin
+                    output_img[dbi_d_cnt/2][15:8] <= dbi_d_o;
+                end
+                else begin
+                    output_img[dbi_d_cnt/2][7:0] <= dbi_d_o;
+                end
+                if(dbi_d_cnt == 320*240*2 - 1) begin    // Output image size is 320x240 (2 data/pixel)
+                    dbi_img_rc_st <= DBI_IMG_IDLE;
+                end
+                dbi_d_cnt = dbi_d_cnt + 1;
+            end
+        endcase
+    end
+    initial begin : IMAGE_RECORD
+        while(1'b1) begin
+            wait(dbi_d_cnt == (320*240*2)); #1;
+            dbi_d_cnt <= 0;
+            $writememh("L:/Projects/dcasic/sim/dut_env/dut_output/img_txt.txt", output_img);
+        end
+    end
+    // -> Record Image when the sub-address is 0x2C 
     /* ------------------------------ DBI TX Controller ------------------------------ */ 
 
     /* ------------------------------ SCCB Monitor ------------------------------ */

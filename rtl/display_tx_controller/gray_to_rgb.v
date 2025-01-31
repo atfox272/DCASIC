@@ -41,9 +41,9 @@ module gray_to_rgb
     assign rgb_pxl_dat_hi   = rgb_pxl_dat[RGB_PXL_W-1-:RGB_SPLIT_W];
     assign rgb_pxl_dat_lo   = rgb_pxl_dat[RGB_SPLIT_W-1-:RGB_SPLIT_W];
     assign rgb_pxl_dat      = {pxl_r_dat, pxl_g_dat, pxl_b_dat};
-    assign pxl_r_dat        = gray_pxl_dat_i[4:0];
-    assign pxl_g_dat        = gray_pxl_dat_i[5:0];
-    assign pxl_b_dat        = gray_pxl_dat_i[4:0];
+    assign pxl_r_dat        = gray_pxl_dat_i[7-:5];
+    assign pxl_g_dat        = gray_pxl_dat_i[7-:6];
+    assign pxl_b_dat        = gray_pxl_dat_i[7-:5];
     // Flip-flop
     always @(posedge clk or negedge rst_n) begin
         if(~rst_n) begin
