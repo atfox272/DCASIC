@@ -36,17 +36,17 @@ module dbi_tx_phy
     localparam T_WRH_SEC        = 33e-9;
     localparam T_HRST_SEC       = 12e-6;
     localparam T_TXN_PAU_SEC    = T_WRL_SEC + T_WRL_SEC;    // Min value is 0ns, but i recommand that it should be greater than the timing of the Write Cycle
-    localparam integer SCALE_FACTOR         = 10e9;
-    localparam integer T_WRL_SEC_INT        = T_WRL_SEC * SCALE_FACTOR;
-    localparam integer T_WRH_SEC_INT        = T_WRH_SEC * SCALE_FACTOR;
-    localparam integer T_HRST_SEC_INT       = T_HRST_SEC * SCALE_FACTOR;
-    localparam integer T_TXN_PAU_SEC_INT    = T_TXN_PAU_SEC * SCALE_FACTOR;
-    localparam integer T_WRL_CYC            = ((T_WRL_SEC_INT * INTERNAL_CLK) / SCALE_FACTOR) + 1;
-    localparam integer T_WRH_CYC            = ((T_WRH_SEC_INT * INTERNAL_CLK) / SCALE_FACTOR) + 1;
-    localparam integer T_HRST_CYC           = ((T_HRST_SEC_INT * INTERNAL_CLK) / SCALE_FACTOR) + 1;
-    localparam integer T_TXN_PAU_CYC        = ((T_TXN_PAU_SEC_INT * INTERNAL_CLK) / SCALE_FACTOR) + 1;
-    localparam integer T_CYC_MAX            = T_HRST_CYC;
-    localparam integer T_CYC_W              = $clog2(T_CYC_MAX) + 1; // Plus 1 to avoid "0 replication"
+    localparam [63:0]   SCALE_FACTOR        = 10e9;
+    localparam [63:0]   T_WRL_SEC_INT       = T_WRL_SEC * SCALE_FACTOR;
+    localparam [63:0]   T_WRH_SEC_INT       = T_WRH_SEC * SCALE_FACTOR;
+    localparam [63:0]   T_HRST_SEC_INT      = T_HRST_SEC * SCALE_FACTOR;
+    localparam [63:0]   T_TXN_PAU_SEC_INT   = T_TXN_PAU_SEC * SCALE_FACTOR;
+    localparam [63:0]   T_WRL_CYC           = ((T_WRL_SEC_INT * INTERNAL_CLK) / SCALE_FACTOR) + 1;
+    localparam [63:0]   T_WRH_CYC           = ((T_WRH_SEC_INT * INTERNAL_CLK) / SCALE_FACTOR) + 1;
+    localparam [63:0]   T_HRST_CYC          = ((T_HRST_SEC_INT * INTERNAL_CLK) / SCALE_FACTOR) + 1;
+    localparam [63:0]   T_TXN_PAU_CYC       = ((T_TXN_PAU_SEC_INT * INTERNAL_CLK) / SCALE_FACTOR) + 1;
+    localparam [63:0]   T_CYC_MAX           = T_HRST_CYC;
+    localparam [63:0]   T_CYC_W             = $clog2(T_CYC_MAX) + 1; // Plus 1 to avoid "0 replication"
     // Internal signal
     // -- wire
     reg     [2:0]               dbi_phy_st_d;

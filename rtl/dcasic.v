@@ -9,7 +9,7 @@ module dcasic
     parameter DBI_IF_D_W        = 8,
     // Instruction Memory
     parameter IMEM_W            = 8,    // 256 instructions
-    parameter BOOTLOADER_FILE   = ""    // Bootloader file of the system
+    parameter BOOTLOADER_FILE   = "L:/Projects/dcasic/bootloader/program_0.hex" // Bootloader file of the system
 ) (
     input                       sys_clk,
     output                      sys_trap_o,
@@ -21,6 +21,7 @@ module dcasic
     // input                       dvp_hsync_i,
     input                       dvp_pclk_i,
     output                      dvp_xclk_o,
+    output                      dvp_pwdn_o,
     // Display TX Interface
     output                      dbi_dcx_o,
     output                      dbi_csx_o,
@@ -438,13 +439,25 @@ module dcasic
         .mc_rvalid_o            (ics_rvalid[DSP_CONF_ID_ADDR]),
 `ifdef IMAGE_STREAM_SUBSYS
         // -- Maxter Pixel Streaming
-        .m_awid_i               (dvp_dbi_awid),
-        .m_awaddr_i             (dvp_dbi_awaddr),
-        .m_awvalid_i            (dvp_dbi_awvalid),
-        .m_wdata_i              (dvp_dbi_wdata),
-        .m_wlast_i              (dvp_dbi_wlast),
-        .m_wvalid_i             (dvp_dbi_wvalid),
-        .m_bready_i             (dvp_dbi_bready),
+        // .m_awid_i               (dvp_dbi_awid),
+        // .m_awaddr_i             (dvp_dbi_awaddr),
+        // .m_awvalid_i            (dvp_dbi_awvalid),
+        // .m_wdata_i              (dvp_dbi_wdata),
+        // .m_wlast_i              (dvp_dbi_wlast),
+        // .m_wvalid_i             (dvp_dbi_wvalid),
+        // .m_bready_i             (dvp_dbi_bready),
+        // .m_awready_o            (dvp_dbi_awready),
+        // .m_wready_o             (dvp_dbi_wready),
+        // .m_bid_o                (dvp_dbi_bid),
+        // .m_bresp_o              (dvp_dbi_bresp),
+        // .m_bvalid_o             (dvp_dbi_bvalid)
+        .m_awid_i               (0),
+        .m_awaddr_i             (DSP_TX_BASE_ADDR),
+        .m_awvalid_i            (1'b1),
+        .m_wdata_i              ({{(VBUS_DATA_W/2){1'b1}}, {(VBUS_DATA_W/2){1'b0}}}),
+        .m_wlast_i              (1'b0),
+        .m_wvalid_i             (1'b1),
+        .m_bready_i             (1'b1),
         .m_awready_o            (dvp_dbi_awready),
         .m_wready_o             (dvp_dbi_wready),
         .m_bid_o                (dvp_dbi_bid),

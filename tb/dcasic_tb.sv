@@ -35,6 +35,7 @@ module dcasic_tb;
     logic                       dvp_hsync_i;
     logic                       dvp_pclk_i;
     logic                       dvp_xclk_o;
+    logic                       dvp_pwdn_o;
     // Display TX Interface
     logic                       dbi_dcx_o;
     logic                       dbi_csx_o;
@@ -48,7 +49,7 @@ module dcasic_tb;
    
 
     dcasic #(
-        .BOOTLOADER_FILE("L:/Projects/dcasic/bootloader/program_0.txt")
+        .BOOTLOADER_FILE("L:/Projects/dcasic/bootloader/program_0.hex")
     ) dut (
         .*
     );
