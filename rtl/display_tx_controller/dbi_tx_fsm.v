@@ -9,28 +9,26 @@ module dbi_tx_fsm
     input                       clk,
     input                       rst_n,
     // -- To AXI4 Configuration Register
-    input                       dbi_tx_start_i,
-    input   [DBI_IF_D_W-1:0]    addr_soft_rst_i,
-    input   [DBI_IF_D_W-1:0]    addr_disp_on_i,
-    input   [DBI_IF_D_W-1:0]    addr_col_i,
-    input   [DBI_IF_D_W-1:0]    addr_row_i,
-    input   [DBI_IF_D_W-1:0]    addr_acs_ctrl_i,
-    input   [DBI_IF_D_W-1:0]    addr_mem_wr_i,
-    input   [DBI_IF_D_W-1:0]    cmd_s_col_h_i,
-    input   [DBI_IF_D_W-1:0]    cmd_s_col_l_i,
-    input   [DBI_IF_D_W-1:0]    cmd_e_col_h_i,
-    input   [DBI_IF_D_W-1:0]    cmd_e_col_l_i,
-    input   [DBI_IF_D_W-1:0]    cmd_s_row_h_i,
-    input   [DBI_IF_D_W-1:0]    cmd_s_row_l_i,
-    input   [DBI_IF_D_W-1:0]    cmd_e_row_h_i,
-    input   [DBI_IF_D_W-1:0]    cmd_e_row_l_i,
-    input   [DBI_IF_D_W-1:0]    cmd_acs_ctrl_i,
+    input   [1:0]               dbi_ctrl_mode_i,
+    input   [DBI_IF_D_W-1:0]    dbi_mem_com_i,
+    input                       tx_type_rw_i,
+    input                       tx_type_hrst_i,
+    input   [2:0]               tx_type_dat_amt_i,
+    input                       tx_type_vld_i,
+    input   [DBI_IF_D_W-1:0]    tx_com_i,
+    input                       tx_com_vld_i,
+    input   [DBI_IF_D_W-1:0]    tx_data_i,
+    input                       tx_data_vld_i,
     // -- To AXI4 FIFO
     input   [DBI_IF_D_W-1:0]    pxl_d_i,
     input                       pxl_vld_i,
     // -- To DBI TX PHY
     input                       dtp_tx_rdy_i,
     // Output declaration
+    // -- To AXI4 Configuration Register
+    output                      tx_type_rdy_o,
+    output                      tx_com_rdy_o,
+    output                      tx_data_rdy_o,
     // -- To AXI4 FIFO
     output                      pxl_rdy_o,
     // -- To DBI TX PHY
@@ -42,20 +40,30 @@ module dbi_tx_fsm
     output                      dtp_tx_vld_o
 );
     // Local parameters
-    localparam IDLE_ST          = 3'd0;
-    localparam DBI_RST_ST       = 3'd1;
-    localparam DBI_RST_CNCL_ST  = 3'd2;
-    localparam DBI_SET_COL_ST   = 3'd3;
-    localparam DBI_SET_ROW_ST   = 3'd4;
-    localparam DBI_MEM_ACS_CTRL = 3'd5;
-    localparam DBI_DISP_ST      = 3'd6;
-    localparam DBI_STM_ST       = 3'd7;
+    localparam IDLE_ST          = 2'd0;
+    localparam DBI_RST_STALL_ST = 2'd1;
+    localparam DBI_CONF_TX      = 2'd2;
+    localparam DBI_STREAM_TX    = 2'd3;
+
+    localparam IDLE_MODE        = 2'h0;
+    localparam CONF_MODE        = 2'h1;
+    localparam STREAM_MODE      = 2'h2;
+    // localparam DBI_SET_COL_ST   = 4'd3;
+    // localparam DBI_SET_ROW_ST   = 4'd4;
+    // localparam DBI_MEM_ACS_CTRL = 4'd5;
+    // localparam DBI_DISP_ST      = 4'd6;
+    // localparam DBI_SLEEP_OUT    = 4'd7;
+    // localparam DBI_SLEEP_WAIT   = 4'd8;
+    // localparam DBI_STM_ST       = 4'd9;
 
     localparam NOP_CMD          = 8'h00;
-    localparam RST_STALL_SEC    = 5e-3;
+    localparam RST_STALL_SEC    = 120e-3;
+    localparam SLP_STALL_SEC    = 6e-3;
     localparam integer SCALE_FACTOR     = 1000; // Use to convert RST_STALL_SEC to a integer
     localparam integer RST_STALL_SEC_INT= RST_STALL_SEC * SCALE_FACTOR; // Convert RST_STALL_SEC_INT to a integer
+    localparam integer SLP_STALL_SEC_INT= SLP_STALL_SEC * SCALE_FACTOR; // Convert SLP_STALL_SEC to a integer
     localparam integer RST_STALL_CYC    = (RST_STALL_SEC_INT * INTERNAL_CLK) / SCALE_FACTOR;    // Return integer
+    localparam integer SLP_STALL_CYC    = (SLP_STALL_SEC_INT * INTERNAL_CLK) / SCALE_FACTOR;    // Return integer
     localparam integer RST_STALL_W      = $clog2(RST_STALL_CYC);
 
     localparam DBI_TX_PER_TXN   = 153600;
@@ -63,7 +71,7 @@ module dbi_tx_fsm
 
     // Internal signal
     // -- wire
-    reg     [2:0]               dbi_tx_st_d;
+    reg     [1:0]               dbi_tx_st_d;
     reg     [RST_STALL_W-1:0]   rst_stall_cnt_d;
     reg                         dtp_dbi_hrst;
     reg     [DBI_IF_D_W-1:0]    dtp_tx_cmd_typ;
@@ -71,41 +79,37 @@ module dbi_tx_fsm
     reg                         dtp_tx_last;
     reg                         dtp_tx_vld;
     reg     [DBI_TX_CNT_W-1:0]  dbi_tx_cnt_d;
-    reg                         dtp_tx_no_dat  ;
-    wire    [DBI_TX_CNT_W-1:0]  set_col_list    [0:3];
-    wire    [DBI_TX_CNT_W-1:0]  set_col_map;
-    wire    [DBI_TX_CNT_W-1:0]  set_row_list    [0:3];
-    wire    [DBI_TX_CNT_W-1:0]  set_row_map;
+    reg                         dtp_tx_no_dat;
     reg                         rgb_pxl_rdy;
+    reg                         tx_type_rdy;
+    reg                         tx_com_rdy;
+    reg                         tx_data_rdy;
     // -- reg
-    reg     [2:0]               dbi_tx_st_q;
+    reg     [1:0]               dbi_tx_st_q;
     reg     [RST_STALL_W-1:0]   rst_stall_cnt_q;
     reg     [DBI_TX_CNT_W-1:0]  dbi_tx_cnt_q;
 
     // Combination logic
+    assign tx_type_rdy_o    = tx_type_rdy;
+    assign tx_com_rdy_o     = tx_com_rdy;
+    assign tx_data_rdy_o    = tx_data_rdy;
     assign dtp_dbi_hrst_o   = dtp_dbi_hrst;
     assign dtp_tx_cmd_typ_o = dtp_tx_cmd_typ;
     assign dtp_tx_cmd_dat_o = dtp_tx_cmd_dat;
     assign dtp_tx_last_o    = dtp_tx_last;
-    assign dtp_tx_no_dat_o  = dtp_tx_no_dat  ;
+    assign dtp_tx_no_dat_o  = dtp_tx_no_dat;
     assign dtp_tx_vld_o     = dtp_tx_vld;
     assign pxl_rdy_o        = rgb_pxl_rdy;
-    assign set_col_list[0]  = cmd_s_col_h_i;
-    assign set_col_list[1]  = cmd_s_col_l_i;
-    assign set_col_list[2]  = cmd_e_col_h_i;
-    assign set_col_list[3]  = cmd_e_col_l_i;
-    assign set_row_list[0]  = cmd_s_row_h_i;
-    assign set_row_list[1]  = cmd_s_row_l_i;
-    assign set_row_list[2]  = cmd_e_row_h_i;
-    assign set_row_list[3]  = cmd_e_row_l_i;
-    assign set_col_map      = set_col_list[dbi_tx_cnt_q[1:0]];
-    assign set_row_map      = set_row_list[dbi_tx_cnt_q[1:0]];
+      
     always @(*) begin
         dbi_tx_st_d         = dbi_tx_st_q;
-        rst_stall_cnt_d     = rst_stall_cnt_q;
+        rst_stall_cnt_d     = (RST_STALL_CYC - 1'b1);   // Set up for Reset state
         dbi_tx_cnt_d        = dbi_tx_cnt_q;
-        dtp_tx_cmd_typ      = NOP_CMD;
-        dtp_tx_cmd_dat      = NOP_CMD;
+        dtp_tx_cmd_typ      = tx_com_i;
+        dtp_tx_cmd_dat      = tx_data_i;
+        tx_type_rdy         = 1'b0;
+        tx_com_rdy          = 1'b0;
+        tx_data_rdy         = 1'b0;
         rgb_pxl_rdy         = 1'b0;
         dtp_dbi_hrst        = 1'b0;
         dtp_tx_last         = 1'b0;
@@ -113,84 +117,46 @@ module dbi_tx_fsm
         dtp_tx_vld          = 1'b0;
         case(dbi_tx_st_q) 
             IDLE_ST: begin
-                if(dbi_tx_start_i) begin
-                    dbi_tx_st_d     = DBI_RST_ST;
+                if(~|(dbi_ctrl_mode_i ^ CONF_MODE) && tx_type_vld_i) begin      // The controller is in CONFIG mode and The transaction is ready 
+                    dbi_tx_st_d = DBI_CONF_TX;
+                    dbi_tx_cnt_d = tx_type_dat_amt_i - 1'b1;
+                end
+                else if (~|(dbi_ctrl_mode_i ^ STREAM_MODE) && pxl_vld_i) begin  // The controller is in STREAM mode and The pixels is ready 
+                    dbi_tx_st_d = DBI_STREAM_TX;
+                    dbi_tx_cnt_d = DBI_TX_PER_TXN - 1'b1;
                 end
             end
-            DBI_RST_ST: begin
-                dtp_tx_vld          = 1'b1;
-                dtp_dbi_hrst        = 1'b1;
-                if(dtp_tx_rdy_i) begin
-                    dbi_tx_st_d     = DBI_RST_CNCL_ST;
-                    rst_stall_cnt_d = (RST_STALL_CYC - 1);
-                end
-            end
-            DBI_RST_CNCL_ST: begin
+            DBI_RST_STALL_ST: begin
                 rst_stall_cnt_d     = rst_stall_cnt_q - 1'b1;
                 if(~|rst_stall_cnt_q) begin
-                    dbi_tx_st_d     = DBI_MEM_ACS_CTRL;
+                    dbi_tx_st_d     = IDLE_ST;
                 end
             end
-            DBI_MEM_ACS_CTRL: begin
-                dtp_tx_cmd_typ      = addr_acs_ctrl_i;
-                dtp_tx_cmd_dat      = cmd_acs_ctrl_i;
-                dtp_tx_last         = 1'b1;
-                dtp_tx_vld          = 1'b1;
-                if(dtp_tx_rdy_i) begin
-                    dbi_tx_st_d     = DBI_SET_COL_ST;
-                    dbi_tx_cnt_d    = {DBI_TX_CNT_W{1'b0}};
-                end
+            DBI_CONF_TX: begin
+                // FSM
+                dbi_tx_st_d = (tx_type_rdy_o & tx_type_vld_i) ? (tx_type_hrst_i ? DBI_RST_STALL_ST : IDLE_ST) : dbi_tx_st_q; // When a transaction (except for Reset transmission) is completed, go back to IDLE state 
+                // Behav
+                dtp_tx_vld = tx_type_vld_i & (tx_type_hrst_i | (tx_com_vld_i & (~(|tx_type_dat_amt_i) | tx_data_vld_i))); // "(~(|tx_type_dat_amt_i) | tx_data_vld_i)": If the TX has data field, then the FIFO_DATA must be valid  
+                // // If type_hrst is valid    -> tx_type_vld_i must be valid
+                // // else                     -> tx_type_vld_i & tx_com_vld_i & tx_data_vld_i must be valid (the data is only needed when data_amt != 0)
+                dtp_dbi_hrst    = tx_type_hrst_i;
+                dtp_tx_no_dat   = ~|tx_type_dat_amt_i; // Data amount == 0
+                dtp_tx_last     = (~|dbi_tx_cnt_q) | tx_type_hrst_i | (~|tx_type_dat_amt_i); // Assert when (last data) | (HW-RST trans) | (No data trans)
+                tx_type_rdy     = dtp_tx_rdy_i & dtp_tx_last; // READY is assert when the last data is sent
+                tx_com_rdy      = tx_type_rdy & (~tx_type_hrst_i); // Just assert when the transmission is not a HW-RST tx
+                tx_data_rdy     = dtp_tx_rdy_i & (|tx_type_dat_amt_i) & (~tx_type_hrst_i);  // Just assert when the transmission has data field (data_amt != 0) and is not a HW-RST tx
+                dbi_tx_cnt_d    = dbi_tx_cnt_q - (dtp_tx_rdy_i & dtp_tx_vld_o);
             end
-            DBI_SET_COL_ST: begin
-                dtp_tx_cmd_typ      = addr_col_i;
-                dtp_tx_cmd_dat      = set_col_map;
-                dtp_tx_vld          = 1'b1;
-                dtp_tx_last         = &dbi_tx_cnt_q[1:0];
-                if(dtp_tx_rdy_i) begin   // Handshake
-                    dbi_tx_cnt_d    = dbi_tx_cnt_q + 1'b1;
-                    if (dtp_tx_last  ) begin   // Handshake with the 4th transfer
-                        dbi_tx_st_d = DBI_SET_ROW_ST;
-                        dbi_tx_cnt_d= {DBI_TX_CNT_W{1'b0}};
-                    end
-                end
-            end
-            DBI_SET_ROW_ST: begin
-                dtp_tx_cmd_typ      = addr_row_i;
-                dtp_tx_cmd_dat      = set_row_map;
-                dtp_tx_vld          = 1'b1;
-                dtp_tx_last         = &dbi_tx_cnt_q[1:0];
-                if(dtp_tx_rdy_i) begin   // Handshake
-                    dbi_tx_cnt_d    = dbi_tx_cnt_q + 1'b1;
-                    if (dtp_tx_last  ) begin   // Handshake with the 4th transfer
-                        dbi_tx_st_d = DBI_DISP_ST;
-                        dbi_tx_cnt_d= {DBI_TX_CNT_W{1'b0}};
-                    end
-                end
-            end
-            DBI_DISP_ST: begin
-                dtp_tx_cmd_typ      = addr_disp_on_i;
-                dtp_tx_no_dat       = 1'b1;
-                dtp_tx_vld          = 1'b1;
-                dtp_tx_last         = 1'b1;
-                if (dtp_tx_rdy_i) begin
-                    dbi_tx_st_d     = DBI_STM_ST;
-                end
-            end
-            DBI_STM_ST: begin
-                dtp_tx_cmd_typ      = addr_mem_wr_i;
-                dtp_tx_cmd_dat      = pxl_d_i;
-                dtp_tx_vld          = pxl_vld_i;
-                rgb_pxl_rdy         = dtp_tx_rdy_i;
-                dtp_tx_last         = ~|(dbi_tx_cnt_q^(DBI_TX_PER_TXN-1));
-                if(dtp_tx_rdy_i) begin
-                    dbi_tx_cnt_d    = dbi_tx_cnt_q + (dtp_tx_rdy_i & dtp_tx_vld_o);
-                    if(dtp_tx_last  ) begin
-                        dbi_tx_cnt_d= {DBI_TX_CNT_W{1'b0}};
-                        if(~dbi_tx_start_i) begin
-                            dbi_tx_st_d = IDLE_ST;  // Stopped by user
-                        end
-                    end
-                end
+            DBI_STREAM_TX: begin
+                // FSM
+                dbi_tx_st_d = (dtp_tx_rdy_i & dtp_tx_vld_o & dtp_tx_last) ? IDLE_ST : dbi_tx_st_q; // When a transaction is completed, go back to IDLE state
+                // Behav
+                rgb_pxl_rdy     = dtp_tx_rdy_i;  
+                dtp_tx_cmd_typ  = dbi_mem_com_i;
+                dtp_tx_cmd_dat  = pxl_d_i;
+                dtp_tx_vld      = pxl_vld_i; 
+                dbi_tx_cnt_d    = dbi_tx_cnt_q - (dtp_tx_rdy_i & dtp_tx_vld_o);
+                dtp_tx_last     = (~|dbi_tx_cnt_q);
             end
         endcase 
     end

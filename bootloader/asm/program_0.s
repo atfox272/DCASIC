@@ -90,6 +90,8 @@ bne x4, x0, FLAG_1
 
 #####################################################
 ######### Configure the DBI TX Controller ###########
+# 0.HW-RST Command
+lui x5, 0x21000 
 # 1. DBI_ADDR_SOFT_RST_REG (addr: 0x2000_0001)
 lui x5,0x20000
 addi x5, x5, 0x01
@@ -133,7 +135,7 @@ sb x4, 0(x5)
 
 # 9. DBI_CMD_END_COLUMN_L_REG(addr: 0x2000_0009)
 addi x5, x5, 0x01
-addi x4, x0, 0xDF
+addi x4, x0, 0x3F
 sb x4, 0(x5)
 
 # A. DBI_CMD_START_ROW_H_REG(addr: 0x2000_000A)
@@ -148,12 +150,12 @@ sb x4, 0(x5)
 
 # C. DBI_CMD_END_ROW_H_REG(addr: 0x2000_000C)
 addi x5, x5, 0x01
-addi x4, x0, 0x01
+addi x4, x0, 0x00
 sb x4, 0(x5)
 
 # D. DBI_CMD_END_ROW_L_REG(addr: 0x2000_000D)
 addi x5, x5, 0x01
-addi x4, x0, 0x3F
+addi x4, x0, 0xEF
 sb x4, 0(x5)
 
 # E. DBI_ADDR_MEM_ACS_CTRL_REG(addr: 0x2000_000E)
@@ -163,7 +165,7 @@ sb x4, 0(x5)
 
 # F. DBI_CMD_MEM_ACS_CTRL_REG(addr: 0x2000_000F)
 addi x5, x5, 0x01
-addi x4, x0, 0x20
+addi x4, x0, 0x00
 sb x4, 0(x5)
 
 # 10. Start DBI TX Controller 

@@ -46,7 +46,8 @@ module dcasic_tb;
     // Camera Controller Interface
     logic                       sio_c;
     wire                        sio_d;
-   
+
+    logic                       debug_0;
 
     dcasic #(
         .BOOTLOADER_FILE("L:/Projects/dcasic/bootloader/program_0.hex")

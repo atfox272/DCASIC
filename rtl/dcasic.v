@@ -1,5 +1,5 @@
 `define IMAGE_STREAM_SUBSYS
-
+`define SILICON_DEBUG
 module dcasic 
 #(
     parameter INTERNAL_CLK      = 50_000_000,
@@ -32,6 +32,11 @@ module dcasic
     // Camera Controller Interface
     output                      sio_c,
     inout                       sio_d
+
+`ifdef SILICON_DEBUG
+    ,output                     debug_0
+`endif
+
 );
     // Local parameters
     //  Configuration BUS
@@ -53,7 +58,8 @@ module dcasic
     localparam IMEM_BASE_ADDR           = {IMEM_ID_ADDR, 29'h0000_0000};        // Base address: 0x0000_0000
     // -- Display TX configuration Memory
     localparam DSP_CONF_ID_ADDR         = 3'h01;
-    localparam DSP_CONF_BASE_ADDR       = {DSP_CONF_ID_ADDR, 29'h0000_0000};    // Base address: 0x2000_0000
+    localparam DSP_CONF_REG_BASE_ADDR   = {DSP_CONF_ID_ADDR, 29'h0000_0000};    // Base address: 0x2000_0000
+    localparam DSP_CONF_TX_BASE_ADDR    = {DSP_CONF_ID_ADDR, 29'h0800_0000};    // Base address: 0x2100_0000
     localparam DSP_CONF_OFS             = 32'h01;                               // Offset: Byte
     // -- Camera RX configuration Memory
     localparam CAM_CONF_ID_ADDR         = 3'h02;
@@ -395,8 +401,9 @@ module dcasic
 
     // -- Display TX controller
     dbi_tx_controller #(
-        .IP_DATA_BASE_ADDR      (DSP_TX_BASE_ADDR),
-        .IP_CONF_BASE_ADDR      (DSP_CONF_BASE_ADDR),
+        .IP_STM_BASE_ADDR       (DSP_TX_BASE_ADDR),
+        .IP_CONF_REG_BASE_ADDR  (DSP_CONF_REG_BASE_ADDR),
+        .IP_CONF_TX_BASE_ADDR   (DSP_CONF_TX_BASE_ADDR),
         .IP_CONF_OFFSET_ADDR    (DSP_CONF_OFS),
         .INTERNAL_CLK           (INTERNAL_CLK),
         .DMA_DATA_W             (VBUS_DATA_W),
@@ -419,12 +426,15 @@ module dcasic
         // -- Master Configuration
         .mc_awid_i              (ics_awid[DSP_CONF_ID_ADDR] ),
         .mc_awaddr_i            (ics_awaddr[DSP_CONF_ID_ADDR]),
+        .mc_awlen_i             (ics_awlen[DSP_CONF_ID_ADDR]),
         .mc_awvalid_i           (ics_awvalid[DSP_CONF_ID_ADDR]),
         .mc_wdata_i             (ics_wdata[DSP_CONF_ID_ADDR][7:0]), // Just use 8bit
+        .mc_wlast_i             (ics_wlast[DSP_CONF_ID_ADDR]),
         .mc_wvalid_i            (ics_wvalid[DSP_CONF_ID_ADDR]),
         .mc_bready_i            (ics_bready[DSP_CONF_ID_ADDR]),
         .mc_arid_i              (ics_arid[DSP_CONF_ID_ADDR]),
         .mc_araddr_i            (ics_araddr[DSP_CONF_ID_ADDR]),
+        .mc_arlen_i             (ics_arlen[DSP_CONF_ID_ADDR]),
         .mc_arvalid_i           (ics_arvalid[DSP_CONF_ID_ADDR]),
         .mc_rready_i            (ics_rready[DSP_CONF_ID_ADDR]),
         .mc_awready_o           (ics_awready[DSP_CONF_ID_ADDR]),
@@ -435,6 +445,7 @@ module dcasic
         .mc_arready_o           (ics_arready[DSP_CONF_ID_ADDR]),
         .mc_rid_o               (ics_rid[DSP_CONF_ID_ADDR]),
         .mc_rdata_o             (ics_rdata[DSP_CONF_ID_ADDR][7:0]), // Just use 8bit
+        .mc_rlast_o             (ics_rlast[DSP_CONF_ID_ADDR]),
         .mc_rresp_o             (ics_rresp[DSP_CONF_ID_ADDR]),
         .mc_rvalid_o            (ics_rvalid[DSP_CONF_ID_ADDR]),
 `ifdef IMAGE_STREAM_SUBSYS
@@ -454,7 +465,7 @@ module dcasic
         .m_awid_i               (0),
         .m_awaddr_i             (DSP_TX_BASE_ADDR),
         .m_awvalid_i            (1'b1),
-        .m_wdata_i              ({{(VBUS_DATA_W/2){1'b1}}, {(VBUS_DATA_W/2){1'b0}}}),
+        .m_wdata_i              ({{(VBUS_DATA_W*3/4){1'b1}}, {(VBUS_DATA_W*1/4){1'b0}}}),
         .m_wlast_i              (1'b0),
         .m_wvalid_i             (1'b1),
         .m_bready_i             (1'b1),
@@ -645,4 +656,7 @@ module dcasic
             assign ics_rready[slv_idx]                                                  = ics_rready_flat[slv_idx];
         end
     endgenerate
+`ifdef SILICON_DEBUG
+    assign debug_0 = |ics_araddr[IMEM_ID_ADDR]; // (!= 0)
+`endif
 endmodule
