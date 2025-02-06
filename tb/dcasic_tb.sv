@@ -5,7 +5,7 @@
 `define RST_DLY_START   3
 `define RST_DUR         9
 
-`define END_TIME        14500000
+`define END_TIME        70000000
 
 // DVP Physical characteristic
 // -- t_PDV = 5 ns = (5/INTERNAL_CLK_PERIOD)*DUT_CLK_PERIOD = (5/8)*2
@@ -235,16 +235,29 @@ module dcasic_tb;
     localparam DBI_IMG_IDLE     = 2'd0;
     localparam DBI_IMG_TX       = 2'd1; 
 
+    localparam DBI_CONF_IDLE    = 2'd0;
+    localparam DBI_CONF_TX      = 2'd1;
     reg [15:0] output_img [0:320*240-1];
 
+    int dbi_conf_st             = DBI_CONF_IDLE;
     int dbi_img_rc_st           = DBI_IMG_IDLE;
     int dbi_d_cnt               = 0;
+    // DBI monitor
     always @(posedge dbi_wrx_o) begin
         case(dbi_img_rc_st)
             DBI_IMG_IDLE: begin
                 if((dbi_d_o == 8'h2C) & (dbi_dcx_o == 1'b0)) begin  // DBI_TX request to write data into frame buffer
                     dbi_img_rc_st <= DBI_IMG_TX;
                     dbi_d_cnt <= 0;
+                end
+                else begin  // Others case 
+                    if(dbi_dcx_o == 1'b0) begin // Command
+                        $display("------------ DBI new info ------------");
+                        $display("DBI Command:  0x%2h", dbi_d_o);
+                    end
+                    else begin  // Data 
+                        $display("DBI Data:     0x%2h", dbi_d_o);
+                    end
                 end
             end
             DBI_IMG_TX: begin
@@ -255,7 +268,8 @@ module dcasic_tb;
                     output_img[dbi_d_cnt/2][7:0] <= dbi_d_o;
                 end
                 if(dbi_d_cnt == 320*240*2 - 1) begin    // Output image size is 320x240 (2 data/pixel)
-                    dbi_img_rc_st <= DBI_IMG_IDLE;
+                    // dbi_img_rc_st <= DBI_IMG_IDLE;
+                    dbi_d_cnt <= 0;
                 end
                 dbi_d_cnt = dbi_d_cnt + 1;
             end

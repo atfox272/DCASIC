@@ -59,7 +59,7 @@ module dcasic
     // -- Display TX configuration Memory
     localparam DSP_CONF_ID_ADDR         = 3'h01;
     localparam DSP_CONF_REG_BASE_ADDR   = {DSP_CONF_ID_ADDR, 29'h0000_0000};    // Base address: 0x2000_0000
-    localparam DSP_CONF_TX_BASE_ADDR    = {DSP_CONF_ID_ADDR, 29'h0800_0000};    // Base address: 0x2100_0000
+    localparam DSP_CONF_TX_BASE_ADDR    = {DSP_CONF_ID_ADDR, 29'h0800_0000};    // Base address: 0x2800_0000
     localparam DSP_CONF_OFS             = 32'h01;                               // Offset: Byte
     // -- Camera RX configuration Memory
     localparam CAM_CONF_ID_ADDR         = 3'h02;
@@ -450,30 +450,30 @@ module dcasic
         .mc_rvalid_o            (ics_rvalid[DSP_CONF_ID_ADDR]),
 `ifdef IMAGE_STREAM_SUBSYS
         // -- Maxter Pixel Streaming
-        // .m_awid_i               (dvp_dbi_awid),
-        // .m_awaddr_i             (dvp_dbi_awaddr),
-        // .m_awvalid_i            (dvp_dbi_awvalid),
-        // .m_wdata_i              (dvp_dbi_wdata),
-        // .m_wlast_i              (dvp_dbi_wlast),
-        // .m_wvalid_i             (dvp_dbi_wvalid),
-        // .m_bready_i             (dvp_dbi_bready),
-        // .m_awready_o            (dvp_dbi_awready),
-        // .m_wready_o             (dvp_dbi_wready),
-        // .m_bid_o                (dvp_dbi_bid),
-        // .m_bresp_o              (dvp_dbi_bresp),
-        // .m_bvalid_o             (dvp_dbi_bvalid)
-        .m_awid_i               (0),
-        .m_awaddr_i             (DSP_TX_BASE_ADDR),
-        .m_awvalid_i            (1'b1),
-        .m_wdata_i              ({{(VBUS_DATA_W*3/4){1'b1}}, {(VBUS_DATA_W*1/4){1'b0}}}),
-        .m_wlast_i              (1'b0),
-        .m_wvalid_i             (1'b1),
-        .m_bready_i             (1'b1),
+        .m_awid_i               (dvp_dbi_awid),
+        .m_awaddr_i             (dvp_dbi_awaddr),
+        .m_awvalid_i            (dvp_dbi_awvalid),
+        .m_wdata_i              (dvp_dbi_wdata),
+        .m_wlast_i              (dvp_dbi_wlast),
+        .m_wvalid_i             (dvp_dbi_wvalid),
+        .m_bready_i             (dvp_dbi_bready),
         .m_awready_o            (dvp_dbi_awready),
         .m_wready_o             (dvp_dbi_wready),
         .m_bid_o                (dvp_dbi_bid),
         .m_bresp_o              (dvp_dbi_bresp),
         .m_bvalid_o             (dvp_dbi_bvalid)
+        // .m_awid_i               (0),
+        // .m_awaddr_i             (DSP_TX_BASE_ADDR),
+        // .m_awvalid_i            (1'b1),
+        // .m_wdata_i              ({{(VBUS_DATA_W*3/4){1'b1}}, {(VBUS_DATA_W*1/4){1'b0}}}),
+        // .m_wlast_i              (1'b0),
+        // .m_wvalid_i             (1'b1),
+        // .m_bready_i             (1'b1),
+        // .m_awready_o            (dvp_dbi_awready),
+        // .m_wready_o             (dvp_dbi_wready),
+        // .m_bid_o                (dvp_dbi_bid),
+        // .m_bresp_o              (dvp_dbi_bresp),
+        // .m_bvalid_o             (dvp_dbi_bvalid)
 `endif
     );
 

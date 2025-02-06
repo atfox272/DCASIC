@@ -133,8 +133,6 @@ module dbi_tx_fsm
                 end
             end
             DBI_CONF_TX: begin
-                // FSM
-                dbi_tx_st_d = (tx_type_rdy_o & tx_type_vld_i) ? (tx_type_hrst_i ? DBI_RST_STALL_ST : IDLE_ST) : dbi_tx_st_q; // When a transaction (except for Reset transmission) is completed, go back to IDLE state 
                 // Behav
                 dtp_tx_vld = tx_type_vld_i & (tx_type_hrst_i | (tx_com_vld_i & (~(|tx_type_dat_amt_i) | tx_data_vld_i))); // "(~(|tx_type_dat_amt_i) | tx_data_vld_i)": If the TX has data field, then the FIFO_DATA must be valid  
                 // // If type_hrst is valid    -> tx_type_vld_i must be valid
@@ -142,14 +140,14 @@ module dbi_tx_fsm
                 dtp_dbi_hrst    = tx_type_hrst_i;
                 dtp_tx_no_dat   = ~|tx_type_dat_amt_i; // Data amount == 0
                 dtp_tx_last     = (~|dbi_tx_cnt_q) | tx_type_hrst_i | (~|tx_type_dat_amt_i); // Assert when (last data) | (HW-RST trans) | (No data trans)
-                tx_type_rdy     = dtp_tx_rdy_i & dtp_tx_last; // READY is assert when the last data is sent
+                tx_type_rdy     = dtp_tx_rdy_i & dtp_tx_last & dtp_tx_vld; // READY is assert when the last data is sent
                 tx_com_rdy      = tx_type_rdy & (~tx_type_hrst_i); // Just assert when the transmission is not a HW-RST tx
-                tx_data_rdy     = dtp_tx_rdy_i & (|tx_type_dat_amt_i) & (~tx_type_hrst_i);  // Just assert when the transmission has data field (data_amt != 0) and is not a HW-RST tx
+                tx_data_rdy     = dtp_tx_rdy_i & dtp_tx_vld & (|tx_type_dat_amt_i) & (~tx_type_hrst_i);  // Just assert when the transmission has data field (data_amt != 0) and is not a HW-RST tx
                 dbi_tx_cnt_d    = dbi_tx_cnt_q - (dtp_tx_rdy_i & dtp_tx_vld_o);
+                // FSM
+                dbi_tx_st_d = (tx_type_rdy_o & tx_type_vld_i) ? (tx_type_hrst_i ? DBI_RST_STALL_ST : IDLE_ST) : dbi_tx_st_q; // When a transaction (except for Reset transmission) is completed, go back to IDLE state 
             end
             DBI_STREAM_TX: begin
-                // FSM
-                dbi_tx_st_d = (dtp_tx_rdy_i & dtp_tx_vld_o & dtp_tx_last) ? IDLE_ST : dbi_tx_st_q; // When a transaction is completed, go back to IDLE state
                 // Behav
                 rgb_pxl_rdy     = dtp_tx_rdy_i;  
                 dtp_tx_cmd_typ  = dbi_mem_com_i;
@@ -157,6 +155,8 @@ module dbi_tx_fsm
                 dtp_tx_vld      = pxl_vld_i; 
                 dbi_tx_cnt_d    = dbi_tx_cnt_q - (dtp_tx_rdy_i & dtp_tx_vld_o);
                 dtp_tx_last     = (~|dbi_tx_cnt_q);
+                // FSM
+                dbi_tx_st_d = (dtp_tx_rdy_i & dtp_tx_vld_o & dtp_tx_last) ? IDLE_ST : dbi_tx_st_q; // When a transaction is completed, go back to IDLE state
             end
         endcase 
     end
