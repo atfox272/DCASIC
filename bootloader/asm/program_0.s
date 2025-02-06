@@ -127,7 +127,17 @@ FLAG_3:
     addi x4, x0, 0x36           # x4: 0x36          (MemAcs Command) 
     sb x4, 0(x5)
     addi x5, x5, 0x01           # x5: 0x28000002   (TX_DATA Address)
-    addi x4, x0, 0x20           # x4: 0x02          (MemAcs Data 1) 
+    addi x4, x0, 0x00           # x4: 0x20          (MemAcs Data 1) 
+    sb x4, 0(x5)
+# 5. Command: Interface Pixel Format
+    lui x5, 0x28000             # x5: 0x28000000    (TX_TYPE Address)
+    addi x4, x0, 0b00000100     # x4: 0x04          (W-1DATA) 
+    sb x4, 0(x5)
+    addi x5, x5, 0x01           # x5: 0x28000001    (TX_COM Address)
+    addi x4, x0, 0x3A           # x4: 0x3A          (Command) 
+    sb x4, 0(x5)
+    addi x5, x5, 0x01           # x5: 0x28000002    (TX_DATA Address)
+    addi x4, x0, 0x55           # x4: 0x05          (Data 1: 16bit pxl) 
     sb x4, 0(x5)
 # 5. Command: Set Column
     lui x5, 0x28000             # x5: 0x28000000   (TX_TYPE Address)
@@ -161,21 +171,14 @@ FLAG_3:
     sb x4, 0(x5)
     addi x4, x0, 0xEF           # x4: 0xEF          (SetRow Data 4 - ER[L]) 
     sb x4, 0(x5)
-# 7. Command: Display ON
-    lui x5, 0x28000             # x5: 0x28000000   (TX_TYPE Address)
-    addi x4, x0, 0b00000000    # x4: 0x02          (W-0DATA) 
-    sb x4, 0(x5)
-    addi x5, x5, 0x01           # x5: 0x28000001   (TX_COM Address)
-    addi x4, x0, 0x29           # x4: 0x29          (DISP_ON Command)
-    sb x4, 0(x5)
-# 8. Command: Sleep OUT
+# 7. Command: Sleep OUT
     lui x5, 0x28000             # x5: 0x28000000   (TX_TYPE Address)
     addi x4, x0, 0b00000000    # x4: 0x02          (W-0DATA) 
     sb x4, 0(x5)
     addi x5, x5, 0x01           # x5: 0x28000001   (TX_COM Address)
     addi x4, x0, 0x11           # x4: 0x11          (SLEEP_OUT Command)
     sb x4, 0(x5)
-# 9. Wait for 6ms after Sleep-out transmission has been sent
+# 8. Wait for 6ms after Sleep-out transmission has been sent
     lui x5, 0x28000
     addi x5, x5, 0x01           # x5: 0x28000001   (TX_TYPE Address)
 FLAG_4:
@@ -185,6 +188,13 @@ FLAG_4:
 FLAG_5:
     addi x7, x7, -0x01
     bne x7, x0, FLAG_5          # Time-out
+# 9. Command: Display ON
+    lui x5, 0x28000             # x5: 0x28000000    (TX_TYPE Address)
+    addi x4, x0, 0b00000000     # x4: 0x02          (W-0DATA) 
+    sb x4, 0(x5)
+    addi x5, x5, 0x01           # x5: 0x28000001    (TX_COM Address)
+    addi x4, x0, 0x29           # x4: 0x29          (DISP_ON Command)
+    sb x4, 0(x5)
 # 10. Configure: Memory write command
     lui x5, 0x20000
     addi x5, x5, 0x01

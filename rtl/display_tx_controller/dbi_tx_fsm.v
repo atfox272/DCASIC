@@ -59,12 +59,12 @@ module dbi_tx_fsm
     localparam NOP_CMD          = 8'h00;
     localparam RST_STALL_SEC    = 120e-3;
     localparam SLP_STALL_SEC    = 6e-3;
-    localparam integer SCALE_FACTOR     = 1000; // Use to convert RST_STALL_SEC to a integer
-    localparam integer RST_STALL_SEC_INT= RST_STALL_SEC * SCALE_FACTOR; // Convert RST_STALL_SEC_INT to a integer
-    localparam integer SLP_STALL_SEC_INT= SLP_STALL_SEC * SCALE_FACTOR; // Convert SLP_STALL_SEC to a integer
-    localparam integer RST_STALL_CYC    = (RST_STALL_SEC_INT * INTERNAL_CLK) / SCALE_FACTOR;    // Return integer
-    localparam integer SLP_STALL_CYC    = (SLP_STALL_SEC_INT * INTERNAL_CLK) / SCALE_FACTOR;    // Return integer
-    localparam integer RST_STALL_W      = $clog2(RST_STALL_CYC);
+    localparam [63:0]   SCALE_FACTOR     = 1000; // Use to convert RST_STALL_SEC to a integer
+    localparam [63:0]   RST_STALL_SEC_INT= RST_STALL_SEC * SCALE_FACTOR; // Convert RST_STALL_SEC_INT to a integer
+    localparam [63:0]   SLP_STALL_SEC_INT= SLP_STALL_SEC * SCALE_FACTOR; // Convert SLP_STALL_SEC to a integer
+    localparam [63:0]   RST_STALL_CYC    = (RST_STALL_SEC_INT * INTERNAL_CLK) / SCALE_FACTOR;    // Return integer
+    localparam [63:0]   SLP_STALL_CYC    = (SLP_STALL_SEC_INT * INTERNAL_CLK) / SCALE_FACTOR;    // Return integer
+    localparam [63:0]   RST_STALL_W      = $clog2(RST_STALL_CYC);
 
     localparam DBI_TX_PER_TXN   = 153600;
     localparam DBI_TX_CNT_W     = $clog2(DBI_TX_PER_TXN);
