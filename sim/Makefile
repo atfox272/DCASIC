@@ -1,9 +1,9 @@
-.PHONY: all step1 step2 step3
+.PHONY: all pre_sim input_gen sim output_anal clean
 
-all: pre_sim input_gen sim output_anal
+all: clean pre_sim input_gen sim output_anal
 
 pre_sim:
-	if not exist dut_env\dut_output\img_txt.txt (echo Creating img_txt.txt > dut_env\dut_output\img_txt.txt)
+	if not exist dut_env\dut_output\img_txt.txt (type nul > dut_env\dut_output\img_txt.txt)
 
 input_gen:
 	python dut_env/dut_input/img2txt.py
@@ -15,5 +15,5 @@ output_anal:
 	python dut_env/dut_output/txt2img.py
 
 clean:
-	del /f dut_env\dut_input\img_txt.txt dut_env\dut_output\img_txt.txt
-	
+	if exist dut_env\dut_input\img_txt.txt del /f dut_env\dut_input\img_txt.txt
+	if exist dut_env\dut_output\img_txt.txt del /f dut_env\dut_output\img_txt.txt
