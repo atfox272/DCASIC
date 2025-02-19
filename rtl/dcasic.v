@@ -41,7 +41,7 @@ module dcasic
     // Local parameters
     //  Configuration BUS
     localparam CONF_MST_AMT             = 1;    // 1 master - processor
-    localparam CONF_SLV_AMT             = 8;    // 8 slaves
+    localparam CONF_SLV_AMT             = 8;    // 8 slaves: IMEM + DSP + CAM + SCCB + DMA + UART
     localparam CONF_DATA_W              = 32;
     localparam CONF_ADDR_W              = 32;
     localparam CONF_MST_ID_W            = 1;    // 1 masters
