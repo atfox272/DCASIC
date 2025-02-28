@@ -373,8 +373,9 @@ module dcasic
     ) im (
         .clk                    (sys_clk),
         .rst_n                  (rst_n),
-        .m_awaddr_i             (ics_awaddr[IMEM_ID_ADDR]>>2),    // Memory: word-access && Processor: byte-access
         .m_awid_i               (ics_awid[IMEM_ID_ADDR]),
+        .m_awaddr_i             (ics_awaddr[IMEM_ID_ADDR]>>2),    // Memory: word-access && Processor: byte-access
+        .m_awburst_i            (2'b01), // INCR
         .m_awlen_i              (ics_awlen[IMEM_ID_ADDR]),
         .m_awvalid_i            (ics_awvalid[IMEM_ID_ADDR]),
         .m_wdata_i              (ics_wdata[IMEM_ID_ADDR]),
@@ -383,6 +384,7 @@ module dcasic
         .m_bready_i             (ics_bready[IMEM_ID_ADDR]),
         .m_arid_i               (ics_arid[IMEM_ID_ADDR]),
         .m_araddr_i             (ics_araddr[IMEM_ID_ADDR]>>2),    // Memory: word-access && Processor: byte-access
+        .m_arburst_i            (2'b01), // INCR
         .m_arlen_i              (ics_arlen[IMEM_ID_ADDR]),
         .m_arvalid_i            (ics_arvalid[IMEM_ID_ADDR]),
         .m_rready_i             (ics_rready[IMEM_ID_ADDR]),
@@ -427,6 +429,7 @@ module dcasic
         .mc_awid_i              (ics_awid[DSP_CONF_ID_ADDR] ),
         .mc_awaddr_i            (ics_awaddr[DSP_CONF_ID_ADDR]),
         .mc_awlen_i             (ics_awlen[DSP_CONF_ID_ADDR]),
+        .mc_awburst_i           (2'b01), // INCR
         .mc_awvalid_i           (ics_awvalid[DSP_CONF_ID_ADDR]),
         .mc_wdata_i             (ics_wdata[DSP_CONF_ID_ADDR][7:0]), // Just use 8bit
         .mc_wlast_i             (ics_wlast[DSP_CONF_ID_ADDR]),
@@ -434,6 +437,7 @@ module dcasic
         .mc_bready_i            (ics_bready[DSP_CONF_ID_ADDR]),
         .mc_arid_i              (ics_arid[DSP_CONF_ID_ADDR]),
         .mc_araddr_i            (ics_araddr[DSP_CONF_ID_ADDR]),
+        .mc_arburst_i           (2'b00), // INCR
         .mc_arlen_i             (ics_arlen[DSP_CONF_ID_ADDR]),
         .mc_arvalid_i           (ics_arvalid[DSP_CONF_ID_ADDR]),
         .mc_rready_i            (ics_rready[DSP_CONF_ID_ADDR]),
@@ -559,6 +563,7 @@ module dcasic
         .rst_n                  (rst_n),
         .m_awid_i               (ics_awid[SCCB_ID_ADDR]),
         .m_awaddr_i             (ics_awaddr[SCCB_ID_ADDR]),
+        .m_awburst_i            (2'b01), // INCR
         .m_awlen_i              (ics_awlen[SCCB_ID_ADDR]),
         .m_awvalid_i            (ics_awvalid[SCCB_ID_ADDR]),
         .m_wdata_i              (ics_wdata[SCCB_ID_ADDR][7:0]),
@@ -567,6 +572,7 @@ module dcasic
         .m_bready_i             (ics_bready[SCCB_ID_ADDR]),
         .m_arid_i               (ics_arid[SCCB_ID_ADDR]),
         .m_araddr_i             (ics_araddr[SCCB_ID_ADDR]),
+        .m_arburst_i            (2'b01),
         .m_arlen_i              (ics_arlen[SCCB_ID_ADDR]),
         .m_arvalid_i            (ics_arvalid[SCCB_ID_ADDR]),
         .m_rready_i             (ics_rready[SCCB_ID_ADDR]),

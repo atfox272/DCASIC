@@ -25,6 +25,7 @@ module sccb_master_controller #(
     // -- -- AW channel         
     input   [MST_ID_W-1:0]          m_awid_i,
     input   [ADDR_W-1:0]            m_awaddr_i,
+    input   [1:0]                   m_awburst_i,
     input   [TRANS_DATA_LEN_W-1:0]  m_awlen_i,
     input                           m_awvalid_i,
     // -- -- W channel          
@@ -36,6 +37,7 @@ module sccb_master_controller #(
     // -- -- AR channel         
     input   [MST_ID_W-1:0]          m_arid_i,
     input   [ADDR_W-1:0]            m_araddr_i,
+    input   [1:0]                   m_arburst_i,
     input   [TRANS_DATA_LEN_W-1:0]  m_arlen_i,
     input                           m_arvalid_i,
     // -- -- R channel          
@@ -127,6 +129,8 @@ endgenerate
     // Module instances
     axi4_ctrl #(
         .AXI4_CTRL_CONF     (1),    // CONF_REG: On
+        .AXI4_CTRL_STAT     (0),    // STAT_REG: Off
+        .AXI4_CTRL_MEM      (0),    // MEM:     Off
         .AXI4_CTRL_WR_ST    (1),    // TX_FIFO: On
         .AXI4_CTRL_RD_ST    (1),    // RX_FIFO: On
         .CONF_BASE_ADDR     (IP_CONF_BASE_ADDR),
@@ -152,6 +156,7 @@ endgenerate
         .rst_n              (rst_n),
         .m_awid_i           (m_awid_i),
         .m_awaddr_i         (m_awaddr_i),
+        .m_awburst_i        (m_awburst_i),
         .m_awlen_i          (m_awlen_i),
         .m_awvalid_i        (m_awvalid_i),
         .m_wdata_i          (m_wdata_i),
@@ -160,9 +165,11 @@ endgenerate
         .m_bready_i         (m_bready_i),
         .m_arid_i           (m_arid_i),
         .m_araddr_i         (m_araddr_i),
+        .m_arburst_i        (m_arburst_i),
         .m_arlen_i          (m_arlen_i),
         .m_arvalid_i        (m_arvalid_i),
         .m_rready_i         (m_rready_i),
+        .stat_reg_i         (),
         .mem_wr_rdy_i       (),
         .mem_rd_data_i      (),
         .mem_rd_rdy_i       (),

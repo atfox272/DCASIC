@@ -1,17 +1,17 @@
 module axi4_mem
 #(
     // AXI4 BUS 
-    parameter DATA_W            = 8,
+    parameter DATA_W            = 256,
     parameter ADDR_W            = 32,
     parameter MST_ID_W          = 5,
     parameter TRANS_DATA_LEN_W  = 8,
     parameter TRANS_DATA_SIZE_W = 3,
     parameter TRANS_RESP_W      = 2,
     // Memory
-    parameter MEM_BASE_ADDR     = 32'h2300_0000,    // Address mapping - BASE
+    parameter MEM_BASE_ADDR     = 32'h0000_0000,    // Address mapping - BASE
     parameter MEM_OFFSET        = (DATA_W/8),       // Address mapping - OFFSET ---> Address (byte-access) = (base + offset*n)
     parameter MEM_DATA_W        = DATA_W,           // Memory's data width
-    parameter MEM_ADDR_W        = 10,               // Memory's address width
+    parameter MEM_ADDR_W        = 14,               // Memory's address width
     parameter MEM_LATENCY       = 1,                // Memory latency
     parameter MEM_INIT_FILE     = ""                // Initial value in Memory
 ) (
@@ -24,6 +24,7 @@ module axi4_mem
     // -- -- AW channel         
     input   [MST_ID_W-1:0]          m_awid_i,
     input   [ADDR_W-1:0]            m_awaddr_i,
+    input   [1:0]                   m_awburst_i,        
     input   [TRANS_DATA_LEN_W-1:0]  m_awlen_i,
     input                           m_awvalid_i,
     // -- -- W channel          
@@ -35,6 +36,7 @@ module axi4_mem
     // -- -- AR channel         
     input   [MST_ID_W-1:0]          m_arid_i,
     input   [ADDR_W-1:0]            m_araddr_i,
+    input   [1:0]                   m_arburst_i,
     input   [TRANS_DATA_LEN_W-1:0]  m_arlen_i,
     input                           m_arvalid_i,
     // -- -- R channel          
@@ -70,6 +72,7 @@ module axi4_mem
     // Module instantiation
     axi4_ctrl #(
         .AXI4_CTRL_CONF     (0),
+        .AXI4_CTRL_STAT     (0),
         .AXI4_CTRL_MEM      (1),
         .AXI4_CTRL_WR_ST    (0),
         .AXI4_CTRL_RD_ST    (0),
@@ -89,6 +92,7 @@ module axi4_mem
         .rst_n              (rst_n),
         .m_awid_i           (m_awid_i),
         .m_awaddr_i         (m_awaddr_i),
+        .m_awburst_i        (m_awburst_i),
         .m_awlen_i          (m_awlen_i),
         .m_awvalid_i        (m_awvalid_i),
         .m_wdata_i          (m_wdata_i),
@@ -97,12 +101,14 @@ module axi4_mem
         .m_bready_i         (m_bready_i),
         .m_arid_i           (m_arid_i),
         .m_araddr_i         (m_araddr_i),
+        .m_arburst_i        (m_arburst_i),
         .m_arlen_i          (m_arlen_i),
         .m_arvalid_i        (m_arvalid_i),
         .m_rready_i         (m_rready_i),
         .mem_wr_rdy_i       (mem_wr_rdy),
         .mem_rd_data_i      (mem_rd_data),
         .mem_rd_rdy_i       (mem_rd_rdy),
+        .stat_reg_i         (),
         .wr_st_rd_vld_i     (),
         .rd_st_wr_data_i    (),
         .rd_st_wr_vld_i     (),

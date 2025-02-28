@@ -39,6 +39,7 @@ module dbi_tx_controller
     // -- -- AW channel
     input   [MST_ID_W-1:0]          mc_awid_i,
     input   [ADDR_W-1:0]            mc_awaddr_i,
+    input   [1:0]                   mc_awburst_i,        
     input   [TRANS_DATA_LEN_W-1:0]  mc_awlen_i,
     input                           mc_awvalid_i,
     // -- -- W channel
@@ -50,6 +51,7 @@ module dbi_tx_controller
     // -- -- AR channel
     input   [MST_ID_W-1:0]          mc_arid_i,
     input   [ADDR_W-1:0]            mc_araddr_i,
+    input   [1:0]                   mc_arburst_i,
     input   [TRANS_DATA_LEN_W-1:0]  mc_arlen_i,
     input                           mc_arvalid_i,
     // -- -- R channel
@@ -165,6 +167,7 @@ endgenerate
     // Module instances
     axi4_ctrl #(
         .AXI4_CTRL_CONF     (1),    // CONF_REG:    On
+        .AXI4_CTRL_STAT     (0),    // STATUS_REG:  Off
         .AXI4_CTRL_MEM      (0),    // MEM:         Off
         .AXI4_CTRL_WR_ST    (1),    // TX_FIFO:     On
         .AXI4_CTRL_RD_ST    (0),    // RX_FIFO:     Off
@@ -191,6 +194,7 @@ endgenerate
         .rst_n              (rst_n),
         .m_awid_i           (mc_awid_i),
         .m_awaddr_i         (mc_awaddr_i),
+        .m_awburst_i        (mc_awburst_i),
         .m_awlen_i          (mc_awlen_i),
         .m_awvalid_i        (mc_awvalid_i),
         .m_wdata_i          (mc_wdata_i),
@@ -199,9 +203,11 @@ endgenerate
         .m_bready_i         (mc_bready_i),
         .m_arid_i           (mc_arid_i),
         .m_araddr_i         (mc_araddr_i),
+        .m_arburst_i        (mc_arburst_i),
         .m_arlen_i          (mc_arlen_i),
         .m_arvalid_i        (mc_arvalid_i),
         .m_rready_i         (mc_rready_i),
+        .stat_reg_i         (),
         .mem_wr_rdy_i       (),
         .mem_rd_data_i      (),
         .mem_rd_rdy_i       (),
